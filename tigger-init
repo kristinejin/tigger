@@ -6,10 +6,10 @@ ls=$(ls -d $dirName 2>/dev/null)
 
 if [ $? -eq 0 ]
 then
-    echo "$0: error: $dirName already exists"
-    exit 0
+    echo "$0: error: $dirName already exists" 1>&2
+    exit 1
 fi 
 
 mkdir $dirName
-
+mkdir $dirName/index
 echo "Initialized empty tigger repository in $dirName"
