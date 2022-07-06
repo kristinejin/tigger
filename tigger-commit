@@ -3,6 +3,17 @@
 # The tigger-commit command saves a copy of all files
 # in the index to the repository.
 
+#######
+
+# The tigger-commit command saves a copy of all files in the index to the repository.
+
+# index directory name: .commit$numOfCommit
+#   e.g. index directory of commit 6 will be .commit6
+
+# 
+#
+#######
+
 
 currBranch="$(cat .tigger/HEAD)"
 currBranchFolder=.tigger/branches/$currBranch
@@ -72,7 +83,7 @@ commitSubset0 () {
 
     #   a. if log file empty, commit will be 0
     count=0
-    commitFolder="commit$count"
+    commitFolder=".commit$count"
     # 2. store everything in index to a new sub-directory in index with commit indexing
     #   b. retrive last log in log file and add one 
     T=$(sed -e 's/\s//g' "$currBranchFolder/log")
@@ -81,7 +92,7 @@ commitSubset0 () {
     then 
         count=$(tail -1 "$currBranchFolder/log" | cut -d' ' -f 1)
         count=$(($count+1))
-        commitFolder="commit$count"
+        commitFolder=".commit$count"
     fi
     mkdir $index/$commitFolder
     cp -f $index/* $index/$commitFolder 2>/dev/null

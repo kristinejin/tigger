@@ -6,9 +6,7 @@
 # fi
 
 # hello
- 
 
- 
 # index=.tigger/branches/master/index
 # for f in $index/*
 # do 
