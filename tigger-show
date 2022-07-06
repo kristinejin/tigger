@@ -4,13 +4,19 @@
 #   as of the specified commit. 
 # If commit is omitted, the contents of the file in the index should be printed.
 
+if [ ! -d ".tigger" ]
+then
+    echo "$0: error: tigger repository directory .tigger not found" 1>&2
+    exit 1
+fi 
+
 currBranch="$(cat .tigger/HEAD)"
-currBranchFolder=.tigger/branches/$currBranch
 index=.tigger/branches/$currBranch/index
 log=.tigger/branches/$currBranch/log
 
 
 # Errors:
+
 
 # 1. "usage: tigger-show <commit>:<filename>" >> multiple arguments | no arguments
 case $# in
@@ -25,8 +31,8 @@ case $# in
         exit 1
     fi
 
-    commit=$(echo $1 | cut -d ':' -f1)
-    fname=$(echo $1 | cut -d ':' -f2)
+    commit=$(echo "$1" | cut -d ':' -f1)
+    fname=$(echo "$1" | cut -d ':' -f2)
     ;;
 *)
     echo "usage: tigger-show <commit>:<filename>" 1>&2
@@ -45,7 +51,8 @@ esac
 # tigger-show: error: 'wp' not found in commit 0
 # tigger-show: error: 'wp' not found in index
 checkFile() {
-    if [ $(find $2 -name $1 | wc -l) -lt 1 ]
+    temp=$(find "$2" -name "$1" 2>/dev/null | wc -l)
+    if [ "$temp" -lt 1 ]
     then
         echo "$0: error: '$1' not found in $3"
         exit 1
@@ -56,25 +63,26 @@ checkFile() {
 # $2 - fname
 commit() {
     checkFile "$2" "$index/.commit$commit/$2" "commit $1"
-    cat $index/.commit$1/$2
+    cat < "$index"/.commit"$1"/"$2"
 }
 
 # 3. "tigger-show: error: invalid filename ''"
 # tigger-show: error: invalid object wowo
 index() {
     checkFile "$1" "$index/$2" "index"
-    cat $index/"$1"
+    cat < "$index"/"$1"
 }
 
-if [ -z $commit ]
+if [ -z "$commit" ]
 then
     # for arguments omitted commit, pass into index
     index "$fname"
 else
     # check if commit can be found
-    if ! cat $log | cut -d' ' -f1 | grep -E "^$commit$" > /dev/null
+    if ! cat < "$log" | cut -d' ' -f1 | grep -E "^$commit$" > /dev/null
     then
         echo "$0: error: unknown commit '$commit'"
+        exit 1
     fi
     commit "$commit" "$fname"
 fi

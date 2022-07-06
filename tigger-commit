@@ -14,6 +14,12 @@
 #
 #######
 
+if [ ! -d ".tigger" ]
+then
+    echo "$0: error: tigger repository directory .tigger not found" 1>&2
+    exit 1
+fi 
+
 
 currBranch="$(cat .tigger/HEAD)"
 currBranchFolder=.tigger/branches/$currBranch
@@ -46,21 +52,20 @@ commitSubset0 () {
     
     # check if what's in index is the same as repo 
     isDiff=0
-    for f in $index/*
+    for f in "$index"/*
     do
-        temp=$(echo $f | tr '/' '\n' | tail -n 1)
+        temp=$(echo "$f" | tr '/' '\n' | tail -n 1)
         repoF=$repo/$temp
         if [ -f "$repoF" ]
         then
             # compare 
-            checkDiff=$(diff $f $repoF)
-            if ! diff $f $repoF >/dev/null 
+            if ! diff "$f" "$repoF" >/dev/null 
             then
                 # check if $f is a directory 
                 if [ ! -d "$f" ]
                 then
                     isDiff=1
-                    cp $f $repo 2>/dev/null
+                    cp "$f" "$repo" 2>/dev/null
                 fi
             fi
         else
@@ -68,7 +73,7 @@ commitSubset0 () {
             if [ ! -d "$f" ]
             then
                 isDiff=1
-                cp $f $repo 2>/dev/null
+                cp "$f" "$repo" 2>/dev/null
             fi
         fi
     done
@@ -91,11 +96,11 @@ commitSubset0 () {
     # if [ ! -s "$currBranchFolder/log" && -z  ]
     then 
         count=$(tail -1 "$currBranchFolder/log" | cut -d' ' -f 1)
-        count=$(($count+1))
+        count=$((count+1))
         commitFolder=".commit$count"
     fi
-    mkdir $index/$commitFolder
-    cp -f $index/* $index/$commitFolder 2>/dev/null
+    mkdir "$index"/"$commitFolder"
+    cp -f "$index"/* "$index"/"$commitFolder" 2>/dev/null
 
     # 3. record this commit with commit index and commit message to log
     # log format: 0 commit message
@@ -114,7 +119,7 @@ commitSubset1 () {
 
 # check arguments
 msgOnly=$(echo "$@" | grep -E '^-m .+$')
-if [ ! -z "$msgOnly" ]
+if [ -n "$msgOnly" ]
 then 
     commitSubset0 "$2"
 elif [ "$#" -eq 2 ]
