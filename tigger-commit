@@ -1,0 +1,73 @@
+#! /bin/dash
+
+
+
+index=.tigger/branches/"$(cat .tigger/HEAD)"/index
+repo=.tigger/repo
+
+# input type checking 
+# usage: tigger-commit [-a] -m commit-message
+if [ "$#" -lt 2 ]
+then
+    echo "usage: tigger-commit [-a] -m commit-message"
+    exit 1
+
+fi
+
+args="$(echo "$@" | grep -E '^(-m .+|-a -m .+| -am .+)$')"
+if [ -z "$args" ]
+then
+    echo "usage: tigger-commit [-a] -m commit-message"
+    exit 1
+fi
+
+###
+
+msgOnly=$(echo "$@" | grep -E '^-m .+$')
+if [ ! -z $checkType ]
+then 
+    commitSubset0 $2
+else if [ "$#" -eq 2 ]
+    commitSubset1 $2
+else 
+    commitSubset1 $3
+fi
+
+
+# function - subset0: commit with message
+commitSubset0 () {
+    ###
+}
+
+# function - subset1: add files and commit with message
+#   all files already in the index to have their contents from the 
+#   current directory added to the index before the commit.
+commitSubset1 () {
+    ###
+}
+
+
+# create new directory in repo with indexing
+
+# add everything in index to repo (ordered folder)
+
+
+find "$index" -type f |
+while read file
+do
+    cp $file $repo
+    exit 0
+done
+
+# if index is empty 
+echo "nothing to commit"
+
+# if log index in log   
+
+
+# record commit message and log index to log file 
+# empty index after commit 
+
+
+# "Committed as commit 0"
+# "nothing to commit"

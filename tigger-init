@@ -10,6 +10,19 @@ then
     exit 1
 fi 
 
+initbranch="master"
+
+# create .tigger directory
 mkdir $dirName
-mkdir $dirName/index
+# create branches directory inside .tigger
+mkdir $dirName/branches
+# create main repo
+mkdir $dirName/repo
+# create directory for master
+mkdir $dirName/branches/$initbranch
+# set HEAD to master
+echo "$initbranch" > $dirName/HEAD
+# create index directory for master branch
+mkdir $dirName/branches/$initbranch/index
+# finish initialisation 
 echo "Initialized empty tigger repository in $dirName"
