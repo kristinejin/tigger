@@ -16,10 +16,12 @@ initbranch="master"
 mkdir $dirName
 # create branches directory inside .tigger
 mkdir $dirName/branches
-# create main repo
-mkdir $dirName/repo
 # create directory for master
 mkdir $dirName/branches/$initbranch
+# create empty log file in master branch
+touch $dirName/branches/$initbranch/log
+# create repo for master branch
+mkdir $dirName/branches/$initbranch/repo
 # set HEAD to master
 echo "$initbranch" > $dirName/HEAD
 # create index directory for master branch
