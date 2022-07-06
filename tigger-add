@@ -23,4 +23,4 @@
 # done
 
 branch="$(cat .tigger/HEAD)"
-cp "$@" .tigger/branches/$branch/index
+cp "$@" .tigger/branches/"$branch"/index

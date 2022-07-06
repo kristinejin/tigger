@@ -46,21 +46,20 @@ commitSubset0 () {
     
     # check if what's in index is the same as repo 
     isDiff=0
-    for f in $index/*
+    for f in "$index"/*
     do
-        temp=$(echo $f | tr '/' '\n' | tail -n 1)
+        temp=$(echo "$f" | tr '/' '\n' | tail -n 1)
         repoF=$repo/$temp
         if [ -f "$repoF" ]
         then
             # compare 
-            checkDiff=$(diff $f $repoF)
             if ! diff $f $repoF >/dev/null 
             then
                 # check if $f is a directory 
                 if [ ! -d "$f" ]
                 then
                     isDiff=1
-                    cp $f $repo 2>/dev/null
+                    cp "$f" "$repo" 2>/dev/null
                 fi
             fi
         else
