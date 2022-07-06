@@ -1,7 +1,13 @@
 #! /bin/dash
 
+if [ ! -d ".tigger" ]
+then
+    echo "$0: error: tigger repository directory .tigger not found" 1>&2
+    exit 1
+fi 
+
 currBranch="$(cat .tigger/HEAD)"
 currBranchFolder=.tigger/branches/$currBranch
 logF=$currBranchFolder/log
 
-cat $logF | sort -nr
+cat < "$logF" | sort -nr

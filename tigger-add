@@ -2,25 +2,24 @@
 
 # add files to index
 # only ordinary file can be added
+
+# Error checking
+# tigger-add: error: tigger repository directory .tigger not found
+if [ ! -d ".tigger" ]
+then
+    echo "$0: error: tigger repository directory .tigger not found" 1>&2
+    exit 1
+fi 
+
 # tigger-add: error: can not open 'b'
-
-
-# for fname in "$@"
-# do 
-#     # count=0
-#     # backup=$fname.$count
-#     # while [ "$(find .tigger/$fname 2>/dev/null)" = "$backup" ] 
-#     # do
-#     #     count=$(($count+1))
-#     #     bname=$fname.$count
-#     # done
-#     # cat $fname > $backup
-
-
-#     # get current branch
-#     branch="$(cat .tigger/HEAD)"
-#     cat $fname > .tigger/branches/$branch/index/$fname
-# done
-
 branch="$(cat .tigger/HEAD)"
-cp "$@" .tigger/branches/$branch/index
+for f in "$@"
+do 
+    if [ ! -f "$f" ]
+    then
+        echo "$0: error: can not open '$f'" 1>&2
+        exit 1
+    fi
+    cp "$f" .tigger/branches/"$branch"/index
+done
+
