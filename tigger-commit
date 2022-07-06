@@ -45,12 +45,20 @@ commitSubset0 () {
             checkDiff=$(diff $f $repoF)
             if ! diff $f $repoF >/dev/null 
             then
-                isDiff=1
-                cp $f $repo
+                # check if $f is a directory 
+                if [ ! -d "$f" ]
+                then
+                    isDiff=1
+                    cp $f $repo 2>/dev/null
+                fi
             fi
         else
-            isDiff=1
-            cp $f $repo
+            # check if $f is a directory 
+            if [ ! -d "$f" ]
+            then
+                isDiff=1
+                cp $f $repo 2>/dev/null
+            fi
         fi
     done
     
@@ -76,7 +84,7 @@ commitSubset0 () {
         commitFolder="commit$count"
     fi
     mkdir $index/$commitFolder
-    cp $index/* $index/$commitFolder 2>/dev/null
+    cp -f $index/* $index/$commitFolder 2>/dev/null
 
     # 3. record this commit with commit index and commit message to log
     # log format: 0 commit message
@@ -97,12 +105,12 @@ commitSubset1 () {
 msgOnly=$(echo "$@" | grep -E '^-m .+$')
 if [ ! -z "$msgOnly" ]
 then 
-    commitSubset0 $2
+    commitSubset0 "$2"
 elif [ "$#" -eq 2 ]
 then
-    commitSubset1 $2
+    commitSubset1 "$2"
 else 
-    commitSubset1 $3
+    commitSubset1 "$3"
     # echo $msgOnly
 fi
 

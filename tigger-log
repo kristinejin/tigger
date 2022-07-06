@@ -1,1 +1,7 @@
 #! /bin/dash
+
+currBranch="$(cat .tigger/HEAD)"
+currBranchFolder=.tigger/branches/$currBranch
+logF=$currBranchFolder/log
+
+cat $logF | sort -nr
