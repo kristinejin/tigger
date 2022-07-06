@@ -1,75 +1,88 @@
 #! /bin/dash
 
-# The tigger-commit command saves a copy of all files
-# in the index to the repository.
+################################################
+################## Doc String ##################
+################################################
 
-#######
+# Desceiption: The tigger-commit command saves a copy of all files in the index to the repository.
 
-# The tigger-commit command saves a copy of all files in the index to the repository.
-
-# index directory name: .commit$numOfCommit
+# Each commit will be record to a log file and all the files in that commit will be saved in a sub-directory name with commit index
+#   -> index sub-directory name: .commit$numOfCommit
 #   e.g. index directory of commit 6 will be .commit6
 
-# 
-#
-#######
+################################################
+################################################
+################################################
 
+# Initial checks to make sure .tigger have been intialized
 if [ ! -d ".tigger" ]
 then
     echo "$0: error: tigger repository directory .tigger not found" 1>&2
     exit 1
 fi 
 
+################################################
+################# GLOBAL VALUE #################
+################################################
 
 currBranch="$(cat .tigger/HEAD)"
 currBranchFolder=.tigger/branches/$currBranch
 index=.tigger/branches/$currBranch/index
 repo=.tigger/branches/$currBranch/repo
 
-# input type checking 
-# usage: tigger-commit [-a] -m commit-message
+################################################
+################################################
+################################################
+
+# Error Checking 
+# 1. Insufficient arguments 
 if [ "$#" -lt 2 ]
 then
-    echo "usage: tigger-commit [-a] -m commit-message"
+    echo "usage: tigger-commit [-a] -m commit-message" 1>&2
     exit 1
 
 fi
 
+# 2. Check to make sure arguments passed in are valid (no empty commit message, no random letters for options)
 args="$(echo "$@" | grep -E '^(-m .+|-a -m .+|-am .+)$')"
 if [ -z "$args" ]
 then
-    echo "usage: tigger-commit [-a] -m commit-message"
+    echo "usage: tigger-commit [-a] -m commit-message" 1>&2
     exit 1
 fi
 
 
-
-# function - subset0: commit with message
+# Subset0: commit with message
+# Saves a copy of all files in the index to the repository
+# $1 - Commit message
 commitSubset0 () {
     commitMsg=$1
-    # when every commit happens
-    # 1. saves a copy of all files in the index to the repository
-    
-    # check if what's in index is the same as repo 
+
+    # 1. Add all updated files in index to repo
+
+    #   isDiff = 1 when there are updated file in index otherwise 0
     isDiff=0
     for f in "$index"/*
     do
         temp=$(echo "$f" | tr '/' '\n' | tail -n 1)
         repoF=$repo/$temp
+        #   When file is in index but not in repo, add the file to repo
+        #   Otherwise, compare the file in index with repo, only add to repo if it's different
         if [ -f "$repoF" ]
         then
-            # compare 
+            #   Compare file in index with the same file in repo 
             if ! diff "$f" "$repoF" >/dev/null 
             then
-                # check if $f is a directory 
+                #   Checks to not copy file over if file is a directory
                 if [ ! -d "$f" ]
                 then
+                    #   Set isDiff to 1 as there is/are file(s) to be updated
                     isDiff=1
                     cp "$f" "$repo" 2>/dev/null
                 fi
             fi
         else
-            # check if $f is a directory 
+            #   Checks to not copy file over if file is a directory
             if [ ! -d "$f" ]
             then
                 isDiff=1
@@ -78,7 +91,7 @@ commitSubset0 () {
         fi
     done
     
-    # exit program when repo is the same with index
+    #   Exit program when repo is the same with index
     if [ $isDiff -eq 0 ]
     then
         echo "nothing to commit"
@@ -86,25 +99,27 @@ commitSubset0 () {
     fi
 
 
-    #   a. if log file empty, commit will be 0
+    # 2. Take a "snapshot" of this commit and put it into a sub-directory in index
+    #   Set initial counter for commit index (if log file is empty then this will be the commit index)
     count=0
     commitFolder=".commit$count"
-    # 2. store everything in index to a new sub-directory in index with commit indexing
-    #   b. retrive last log in log file and add one 
+    #   Retrive the last commit index in log file (if log file is not empty) and increment to get current commit index
     T=$(sed -e 's/\s//g' "$currBranchFolder/log")
     if [ -n "$T" ]
-    # if [ ! -s "$currBranchFolder/log" && -z  ]
     then 
         count=$(tail -1 "$currBranchFolder/log" | cut -d' ' -f 1)
         count=$((count+1))
         commitFolder=".commit$count"
     fi
+    #   Make a new sub-directory for this commit inside index and copy all files in index to this sub-directory
     mkdir "$index"/"$commitFolder"
     cp -f "$index"/* "$index"/"$commitFolder" 2>/dev/null
 
     # 3. record this commit with commit index and commit message to log
-    # log format: 0 commit message
+    #   log format: 0 commit message
     echo "$count $commitMsg" >> "$currBranchFolder/log"
+
+    # 4. A message to standard output for users
     echo "Committed as commit $count"
     exit 0
 }
@@ -117,7 +132,11 @@ commitSubset1 () {
     echo "Subset 1 commit not implemented"
 }
 
-# check arguments
+# Check argument types and redirect to functions accordingly
+# Three types: 
+#   1. -m "msg"
+#   2. -am "msg"
+#   3. -a -m "msg"
 msgOnly=$(echo "$@" | grep -E '^-m .+$')
 if [ -n "$msgOnly" ]
 then 
@@ -127,30 +146,4 @@ then
     commitSubset1 "$2"
 else 
     commitSubset1 "$3"
-    # echo $msgOnly
 fi
-
-
-# create new directory in repo with indexing
-
-# add everything in index to repo (ordered folder)
-
-
-# find "$index" -type f |
-# while read file
-# do
-#     cp $file $repo
-#     exit 0
-# done
-
-# # if index is empty 
-# echo "nothing to commit"
-
-# if log index in log   
-
-
-# record commit message and log index to log file 
-
-# "Committed as commit 0"
-# "nothing to commit"
-    # if the content in index is the same as repo
