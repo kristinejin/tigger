@@ -1,0 +1,80 @@
+#! /bin/dash
+
+# The tigger-show should print the contents of the specified filename 
+#   as of the specified commit. 
+# If commit is omitted, the contents of the file in the index should be printed.
+
+currBranch="$(cat .tigger/HEAD)"
+currBranchFolder=.tigger/branches/$currBranch
+index=.tigger/branches/$currBranch/index
+log=.tigger/branches/$currBranch/log
+
+
+# Errors:
+
+# 1. "usage: tigger-show <commit>:<filename>" >> multiple arguments | no arguments
+case $# in
+0) 
+    echo "usage: tigger-show <commit>:<filename>"  
+    exit 1
+    ;;
+1) 
+    if ! echo "$1" | grep ':' >/dev/null
+    then 
+        echo "$0: error: invalid object $1" 1>&2
+        exit 1
+    fi
+
+    commit=$(echo $1 | cut -d ':' -f1)
+    fname=$(echo $1 | cut -d ':' -f2)
+    ;;
+*)
+    echo "usage: tigger-show <commit>:<filename>" 1>&2
+    exit 1
+    ;;
+esac
+
+# 2. "tigger-show: error: unknown commit '10'"
+#   a. check if commit is omitted
+
+# a function to check if a filename exist in a folder
+# $1: filename
+# $2: folder name
+# $3: type (index or commit --> with commit number)
+
+# tigger-show: error: 'wp' not found in commit 0
+# tigger-show: error: 'wp' not found in index
+checkFile() {
+    if [ $(find $2 -name $1 | wc -l) -lt 1 ]
+    then
+        echo "$0: error: '$1' not found in $3"
+        exit 1
+    fi
+}
+
+# $1 - commit index
+# $2 - fname
+commit() {
+    checkFile "$2" "$index/.commit$commit/$2" "commit $1"
+    cat $index/.commit$1/$2
+}
+
+# 3. "tigger-show: error: invalid filename ''"
+# tigger-show: error: invalid object wowo
+index() {
+    checkFile "$1" "$index/$2" "index"
+    cat $index/"$1"
+}
+
+if [ -z $commit ]
+then
+    # for arguments omitted commit, pass into index
+    index "$fname"
+else
+    # check if commit can be found
+    if ! cat $log | cut -d' ' -f1 | grep -E "^$commit$" > /dev/null
+    then
+        echo "$0: error: unknown commit '$commit'"
+    fi
+    commit "$commit" "$fname"
+fi
