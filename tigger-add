@@ -11,7 +11,11 @@ then
     exit 1
 fi 
 
-# tigger-add: error: can not open 'b'
+if [ $# -eq 0 ]
+then
+    echo "usage: tigger-add <filenames>"
+fi
+
 branch="$(cat .tigger/HEAD)"
 for f in "$@"
 do 
