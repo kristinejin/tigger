@@ -14,14 +14,20 @@
 #     echo 1
 # done
 
-currBranch="$(cat .tigger/HEAD)"
-currBranchFolder=.tigger/branches/$currBranch
-index=.tigger/branches/"$currBranch"/index
+# currBranch="$(cat .tigger/HEAD)"
+# currBranchFolder=.tigger/branches/$currBranch
+# index=.tigger/branches/"$currBranch"/index
 
-find "$index"
-if [ -d "$index" ]
+# find "$index"
+# if [ -d "$index" ]
+# then
+#     echo "n"
+#     exit 0
+# fi
+# echo "yes"
+
+true=1
+if "$true"
 then
-    echo "n"
-    exit 0
+    echo true
 fi
-echo "yes"

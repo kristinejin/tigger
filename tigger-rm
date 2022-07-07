@@ -1,1 +1,162 @@
 #! /bin/dash
+
+#! /bin/dash
+
+#####################
+### Functionality ###
+#####################
+# * tigger-rm (without option): rm file in index and directory (can be multiple files)
+#   -> give warning for files in unstaged changes 
+#       -> file in index not present in repo 
+#       -> file in index different with repo
+# * --force --cached
+#   -> force will always be in front of cached
+# * --cached
+#   -> remove file in index only 
+#   -> no warning will occur
+# * --force
+#   -> ignore any warning, and continue removing file in curr dir and index
+
+#####################
+####### Error #######
+#####################
+# * tigger-rm: error: 'a' has staged changes in the index
+#   -> when 'a' in current directory and index but not in repo
+
+# * tigger-rm: error: 'a' in the repository is different to the working file
+#   -> when changes not add to index but repo have a track of that file
+
+# * tigger-rm: error: 'a' in index is different to both the working file and the repository
+#   -> combination of both
+
+# * tigger-rm: error: 'a' is not in the tigger repository
+#   -> when 'a' is in current directory but not index
+
+# * no error when 'a' not in current directory but in index
+
+
+currBranch="$(cat .tigger/HEAD)"
+currBranchFolder=.tigger/branches/$currBranch
+index=.tigger/branches/$currBranch/index
+repo=.tigger/branches/$currBranch/repo
+
+isCached=0
+isForce=0
+
+# Check if there is a repository
+if [ ! -d ".tigger" ]
+then
+    echo "$0: error: tigger repository directory .tigger not found" 1>&2
+    exit 1
+fi 
+
+# Check sufficient arguments
+if [ $# -eq 0 ]
+then
+    echo "usage: tigger-rm [--force] [--cached] <filenames>" 1>&2
+    exit 1 
+fi
+
+# Check if there are invalid arguments, e.g. --hello
+for arg in "$@"
+do
+    if echo "$arg" | grep -E "^--.*" >/dev/null
+    then
+        if [ "$arg" != '--force' ] && [ "$arg" != '--cached' ]
+        then
+            echo "usage: tigger-rm [--force] [--cached] <filenames>" 1>&2
+            exit 1 
+        fi
+    fi
+done
+
+# Check if all passed in files are in index
+for arg in "$@"
+do
+    if ! echo "$arg" | grep -E '^--.*' >/dev/null
+    then 
+        ## check if in index
+        if [ ! -f "$index"/"$arg" ]
+        then
+            echo "tigger-rm: error: '$arg' is not in the tigger repository" 1>&2
+            exit 1
+        fi
+    fi
+done
+
+# $1 must be a file name if there is only one argument
+if [ $# -eq 1 ]
+then
+    if echo $1 | grep -E '^--.*' > /dev/null
+    then
+        echo "usage: tigger-rm [--force] [--cached] <filenames>" 1>&2
+        exit 1
+    fi
+# Check valid arguments
+elif [ $# -eq 2 ]
+then
+    if echo $1 | grep -E '^--(force|cached)$' > /dev/null
+    then
+        if echo $2 | grep -E '^--.*' > /dev/null
+        then  
+            echo "usage: tigger-rm [--force] [--cached] <filenames>" 1>&2
+            exit 1 
+        fi
+
+        if [ $1 = "--force" ]
+        then
+            isForce=1
+        else
+            isCached=1
+        fi
+    fi
+else 
+    ##### check for force and cached
+    if [ $1 = "--cached" ]
+    then
+        isCached=1
+    elif [ $1 = "--force" ]
+    then
+        isForce=1
+        if [ $2 = "--cached" ]
+        then
+            isCached=1
+        fi
+    fi
+fi
+
+# Given a file name ($1) in index, check if it's commited to repo
+# If not, raise an error
+# TODO: check between repo and working directory as well 
+warning() {
+    if [ ! -f "$repo"/$1 ]
+    then
+        echo "tigger-rm: error: '$1' has staged changes in the index" 1>&2
+        exit 1
+    fi 
+    else if ! diff "index"/$1 "$repo"/$1 >/dev/null 
+    then
+        echo "tigger-rm: error: '$1' has staged changes in the index" 1>&2
+        exit 1
+    fi
+    else
+        return 0
+}
+
+for f in "$@"
+do 
+    if ! echo "$f" | grep -E '^--.*' >/dev/null
+    then
+        ### do something 
+        if [ isForce != 1 && isCached != 1 ]
+        then
+            warning "$f"
+        fi
+        else if [ isCached == 1 ]
+        then
+            removeIndex
+        fi
+        else 
+
+    fi
+done
