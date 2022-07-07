@@ -1,0 +1,50 @@
+#! /bin/dash
+
+
+currBranch="$(cat .tigger/HEAD)"
+currBranchFolder=.tigger/branches/$currBranch
+index=.tigger/branches/$currBranch/index
+repo=.tigger/branches/$currBranch/repo
+commitMsg=$1
+
+# 1. Index is empty
+isEmpty=0
+for f in "$index"/*
+do 
+    if [ -f "$f" ]
+    then
+        isEmpty=1
+    fi
+done
+
+if [ "$isEmpty" -eq 0 ]
+then
+    echo "nothing to commit"
+    exit 0
+fi
+
+# 3. Get new updates in directory
+#   - Change name == delete file w/old name + create new file w/ the new name
+#   - Commit when with file deleted -> delete the corresponding file in index
+#   - Add everything in directory to index
+
+for f in "$index"/*
+do 
+    fName="$(echo "$f" | tr '/' '\n' | tail -n 1)"
+    if [ -f "$fName" ]
+    then
+        # file is present in current directory 
+        # check if there's anything new to add
+        if ! diff "$fName" "$f" >/dev/null 
+        then
+            #   Set isDiff to 1 as there is/are file(s) to be updated
+            cp "$fName" "$f" 2>/dev/null
+        fi
+    else
+        # file has been deleted - delete file in index (and repo when commit)
+        rm "$f"
+    fi
+done
+
+# 4. Call tigger-commit with -m
+tigger-commit -m "$commitMsg"

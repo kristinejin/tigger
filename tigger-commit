@@ -64,29 +64,40 @@ commitSubset0 () {
     isDiff=0
     for f in "$index"/*
     do
+
         temp=$(echo "$f" | tr '/' '\n' | tail -n 1)
         repoF=$repo/$temp
-        #   When file is in index but not in repo, add the file to repo
-        #   Otherwise, compare the file in index with repo, only add to repo if it's different
-        if [ -f "$repoF" ]
+
+        #   Update existing file to repo (only when there are updates)
+        if [ -f "$repoF" ] && [ ! -d "$f" ]
         then
             #   Compare file in index with the same file in repo 
             if ! diff "$f" "$repoF" >/dev/null 
             then
-                #   Checks to not copy file over if file is a directory
-                if [ ! -d "$f" ]
-                then
-                    #   Set isDiff to 1 as there is/are file(s) to be updated
-                    isDiff=1
-                    cp "$f" "$repo" 2>/dev/null
-                fi
-            fi
-        else
-            #   Checks to not copy file over if file is a directory
-            if [ ! -d "$f" ]
-            then
+                #   Set isDiff to 1 as there is/are file(s) to be updated
                 isDiff=1
                 cp "$f" "$repo" 2>/dev/null
+            fi
+        
+        #   Commit a new file from index to repo 
+        elif [ ! -d "$f" ]
+        then
+            isDiff=1
+            cp "$f" "$repo" 2>/dev/null
+        fi
+    
+    done
+
+    # Check for deleted file in index 
+    for file in "$repo"/*
+    do 
+        if [ ! -d "$file" ]
+        then
+            temp=$(echo "$file" | tr '/' '\n' | tail -n 1)
+            if [ ! -f "$index"/"$temp" ]
+            then
+                rm "$file"
+                isDiff=1
             fi
         fi
     done
@@ -129,7 +140,7 @@ commitSubset0 () {
 # #   current directory added to the index before the commit.
 commitSubset1 () {
     ###
-    echo "Subset 1 commit not implemented"
+    tigger-commit-subset1 "$1"
 }
 
 # Check argument types and redirect to functions accordingly
