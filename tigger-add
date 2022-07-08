@@ -17,7 +17,7 @@ then
 fi
 
 branch="$(cat .tigger/HEAD)"
-repo=.tigger/branches/"$branch"/index
+index=.tigger/branches/"$branch"/index
 for f in "$@"
 do 
     if [ ! -f "$f" ]
@@ -34,3 +34,14 @@ do
     fi
 done
 
+
+# $ tigger-init
+# Initialized empty tigger repository in .tigger
+# $ touch a b
+# $ tigger-add a b
+# $ tigger-commit -m "first commit"
+# Committed as commit 0
+# $ rm a
+# $ tigger-commit -m "second commit"
+# nothing to commit
+# $ tigger-add a
