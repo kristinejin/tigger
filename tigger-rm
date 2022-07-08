@@ -179,9 +179,19 @@ do
             warning "$f"
             removeIndex "$f"
             removeWorkingDir "$f"
+        elif [ "$isForce" -eq 1 ] && [ "$isCached" -eq 1 ]
+        then    
+            removeIndex "$f"
         elif [ "$isCached" -eq 1 ] 
         then
-            if ! diff "$index"/"$f" "$repo"/"$f" >/dev/null && ! diff "$f" "$index"/"$f" >/dev/null
+            if [ ! -f "$repo"/"$f" ]
+            then
+                if ! diff "$f" "$index"/"$f" >/dev/null
+                then
+                    echo "tigger-rm: error: '$f' in index is different to both the working file and the repository" 1>&2
+                    exit 1
+                fi
+            elif ! diff "$index"/"$f" "$repo"/"$f" >/dev/null && ! diff "$f" "$index"/"$f" >/dev/null
             then
                 if [ "$isForce" -ne 1 ]
                 then

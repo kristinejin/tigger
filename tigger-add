@@ -17,13 +17,20 @@ then
 fi
 
 branch="$(cat .tigger/HEAD)"
+repo=.tigger/branches/"$branch"/index
 for f in "$@"
 do 
     if [ ! -f "$f" ]
     then
-        echo "$0: error: can not open '$f'" 1>&2
-        exit 1
+        if [ -f "$index"/"$f" ]
+        then
+            rm "$index"/"$f"
+        else
+            echo "$0: error: can not open '$f'" 1>&2
+            exit 1
+        fi
+    else
+        cp "$f" .tigger/branches/"$branch"/index
     fi
-    cp "$f" .tigger/branches/"$branch"/index
 done
 
