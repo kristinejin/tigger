@@ -1,1 +1,26 @@
 #! /bin/dash
+
+#####################
+### Functionality ###
+#####################
+# * tigger-rm (without option): rm file in index and directory 
+#   -> give warning for files in unstaged changes 
+#       -> file in index not present in repo 
+#       -> file in index different with repo
+# * --force --cached
+#   -> force will always be in front of cached
+# * --cached
+#   -> remove file in index only 
+# * --force
+#   -> ignore any warning, and continue removing file in curr dir and index
+
+#####################
+####### Error #######
+#####################
+# * tigger-rm: error: 'a' has staged changes in the index
+#   -> when 'a' in current directory and index but not in repo
+
+# * tigger-rm: error: 'a' is not in the tigger repository
+#   -> when 'a' is in current directory but not index
+
+# * no error when 'a' not in current directory but in index

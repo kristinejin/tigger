@@ -24,6 +24,7 @@ do
         echo "$0: error: can not open '$f'" 1>&2
         exit 1
     fi
-    cp "$f" .tigger/branches/"$branch"/index
 done
+
+cp "$f" .tigger/branches/"$branch"/index
 
