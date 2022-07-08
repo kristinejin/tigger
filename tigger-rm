@@ -35,6 +35,7 @@
 # * no error when 'a' not in current directory but in index
 
 
+
 currBranch="$(cat .tigger/HEAD)"
 currBranchFolder=.tigger/branches/$currBranch
 index=.tigger/branches/$currBranch/index
@@ -46,7 +47,7 @@ isForce=0
 # Check if there is a repository
 if [ ! -d ".tigger" ]
 then
-    echo "$0: error: tigger repository directory .tigger not found" 1>&2
+    echo "tigger-rm: error: tigger repository directory .tigger not found" 1>&2
     exit 1
 fi 
 
@@ -129,34 +130,70 @@ fi
 # If not, raise an error
 # TODO: check between repo and working directory as well 
 warning() {
+    # if file in index but not in repo
     if [ ! -f "$repo"/$1 ]
     then
+        if ! diff "$index"/$1 $1 >/dev/null
+        then
+            echo "tigger-rm: error: '$1' in index is different to both the working file and the repository" 1>&2
+            exit 1
+        fi
         echo "tigger-rm: error: '$1' has staged changes in the index" 1>&2
         exit 1
-    fi 
-    else if ! diff "index"/$1 "$repo"/$1 >/dev/null 
+    elif ! diff "$index"/$1 "$repo"/$1 >/dev/null && ! diff $1 "$index"/$1 >/dev/null
+    then
+        echo "tigger-rm: error: '$1' in index is different to both the working file and the repository" 1>&2
+        exit 1
+    elif ! diff "$index"/$1 "$repo"/$1 >/dev/null 
     then
         echo "tigger-rm: error: '$1' has staged changes in the index" 1>&2
         exit 1
+    elif ! diff $1 "$repo"/$1 >/dev/null
+    then
+        echo "tigger-rm: error: '$1' in the repository is different to the working file" 1>&2
+        exit 1
     fi
-    else
-        return 0
+
+    # return 0
 }
+
+removeIndex() {
+    rm "$index"/$1
+}
+
+removeWorkingDir() {
+    rm $1
+}
+
+# index same with repo
+# or index same with curr dir
+# curr dir same with repo don't matter
 
 for f in "$@"
 do 
     if ! echo "$f" | grep -E '^--.*' >/dev/null
     then
         ### do something 
-        if [ isForce != 1 && isCached != 1 ]
+        if [ "$isForce" -ne 1 ] && [ "$isCached" -ne 1 ]
         then
             warning "$f"
-        fi
-        else if [ isCached == 1 ]
+            removeIndex "$f"
+            removeWorkingDir "$f"
+        elif [ "$isCached" -eq 1 ] 
         then
-            removeIndex
+            if ! diff "$index"/"$f" "$repo"/"$f" >/dev/null && ! diff "$f" "$index"/"$f" >/dev/null
+            then
+                if [ "$isForce" -ne 1 ]
+                then
+                    echo "tigger-rm: error: '$f' in index is different to both the working file and the repository" 1>&2
+                    exit 1
+                fi
+            fi
+            removeIndex "$f"
+        elif [ "$isForce" -eq 1 ]
+        then
+            removeIndex "$f"
+            removeWorkingDir "$f"
         fi
-        else 
-
     fi
 done

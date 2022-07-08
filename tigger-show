@@ -6,7 +6,7 @@
 
 if [ ! -d ".tigger" ]
 then
-    echo "$0: error: tigger repository directory .tigger not found" 1>&2
+    echo "tigger-show: error: tigger repository directory .tigger not found" 1>&2
     exit 1
 fi 
 
@@ -27,7 +27,7 @@ case $# in
 1) 
     if ! echo "$1" | grep ':' >/dev/null
     then 
-        echo "$0: error: invalid object $1" 1>&2
+        echo "tigger-show: error: invalid object $1" 1>&2
         exit 1
     fi
 
@@ -43,33 +43,25 @@ esac
 # 2. "tigger-show: error: unknown commit '10'"
 #   a. check if commit is omitted
 
-# a function to check if a filename exist in a folder
-# $1: filename
-# $2: folder name
-# $3: type (index or commit --> with commit number)
-
-# tigger-show: error: 'wp' not found in commit 0
-# tigger-show: error: 'wp' not found in index
-checkFile() {
-    temp=$(find "$2" -name "$1" 2>/dev/null | wc -l)
-    if [ "$temp" -lt 1 ]
-    then
-        echo "$0: error: '$1' not found in $3"
-        exit 1
-    fi
-}
-
 # $1 - commit index
 # $2 - fname
 commit() {
-    checkFile "$2" "$index/.commit$commit/$2" "commit $1"
+    if [ ! -f "$index"/.commit$1/$2 ]
+    then
+        echo "tigger-show: error: '$2' not found in commit $1"
+        exit 1
+    fi
     cat < "$index"/.commit"$1"/"$2"
 }
 
 # 3. "tigger-show: error: invalid filename ''"
 # tigger-show: error: invalid object wowo
 index() {
-    checkFile "$1" "$index/$2" "index"
+    if [ ! -f "$index"/$1 ]
+    then
+        echo "tigger-show: error: '$1' not found in index"
+        exit 1
+    fi
     cat < "$index"/"$1"
 }
 
@@ -81,7 +73,7 @@ else
     # check if commit can be found
     if ! cat < "$log" | cut -d' ' -f1 | grep -E "^$commit$" > /dev/null
     then
-        echo "$0: error: unknown commit '$commit'"
+        echo "tigger-show: error: unknown commit '$commit'"
         exit 1
     fi
     commit "$commit" "$fname"
