@@ -8,7 +8,6 @@ then
 fi 
 
 currBranch="$(cat .tigger/HEAD)"
-currBranchFolder=.tigger/branches/$currBranch
 index=.tigger/branches/"$currBranch"/index
 repo=.tigger/branches/"$currBranch"/repo
 
@@ -85,15 +84,15 @@ do
         # compare all three of them
         if ! diff "$f" "$index"/"$f" >/dev/null && ! diff "$index"/"$f" "$repo"/"$f" >/dev/null
         then
-            echo "$f: file changed, different changes staged for commit"
+            echo "$f - file changed, different changes staged for commit"
         elif ! diff "$index"/"$f" "$repo"/"$f" 
         then
-            echo "$f: file changed, changes staged for commit"
+            echo "$f - file changed, changes staged for commit"
         elif ! diff "$f" "$index"/"$f"
         then    
-            echo "$f: file changed, changes not staged for commit"
+            echo "$f - file changed, changes not staged for commit"
         else
-            echo "$f: same as repo"
+            echo "$f - same as repo"
         fi
     elif [ "$inWorking" -eq 1 ] && [ "$inIndex" -eq 1 ]
     then
@@ -101,35 +100,35 @@ do
         # compare working dir and index
         if ! diff "$f" "$index"/"$f" >/dev/null
         then
-            echo "$f: added to index, file changed"
+            echo "$f - added to index, file changed"
         else 
-            echo "$f: added to index"
+            echo "$f - added to index"
         fi
     elif [ "$inWorking" -eq 1 ] && [ "$inRepo" -eq 1 ]
     then
         # file not in index
-        echo "$f: untracked"
-    elif [ "$inIndex" -eq 1 ] && [ "inRepo" -eq 1 ]
+        echo "$f - untracked"
+    elif [ "$inIndex" -eq 1 ] && [ "$inRepo" -eq 1 ]
     then   
         # file not in working dir -- file deleted ? 
         # compare index and repo
         if ! diff "$index"/"$f" "$repo"/"$f" >/dev/null
         then 
-            echo "$f: file deleted, different changes staged for commit"
+            echo "$f - file deleted, different changes staged for commit"
         else
-            echo "$f: file deleted"
+            echo "$f - file deleted"
         fi
     elif [ "$inWorking" -eq 1 ]
     then    
         # file not in index and repo
-        echo "$f: untracked"
+        echo "$f - untracked"
     elif [ "$inIndex" -eq 1 ]
     then
         # file not in working and repo
-        echo "$f: added to index, file deleted"
+        echo "$f - added to index, file deleted"
     else
         # file not in working and index
-        echo "$f: deleted"
+        echo "$f - deleted"
     fi
 
 done
