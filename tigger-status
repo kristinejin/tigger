@@ -85,10 +85,10 @@ do
         if ! diff "$f" "$index"/"$f" >/dev/null && ! diff "$index"/"$f" "$repo"/"$f" >/dev/null
         then
             echo "$f - file changed, different changes staged for commit"
-        elif ! diff "$index"/"$f" "$repo"/"$f" 
+        elif ! diff "$index"/"$f" "$repo"/"$f" >/dev/null
         then
             echo "$f - file changed, changes staged for commit"
-        elif ! diff "$f" "$index"/"$f"
+        elif ! diff "$f" "$index"/"$f" >/dev/null
         then    
             echo "$f - file changed, changes not staged for commit"
         else
