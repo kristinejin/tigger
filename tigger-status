@@ -1,5 +1,12 @@
 #! /bin/dash
 
+# Initial checks to make sure .tigger have been intialized
+if [ ! -d ".tigger" ]
+then
+    echo "$0: error: tigger repository directory .tigger not found" 1>&2
+    exit 1
+fi 
+
 currBranch="$(cat .tigger/HEAD)"
 currBranchFolder=.tigger/branches/$currBranch
 index=.tigger/branches/"$currBranch"/index
@@ -54,7 +61,15 @@ checkRepo() {
     inRepo=0
 }
 
-find * "$index" "$repo" -type f | sed "s/.*\///" | sort -u |
+checkCurrrDir="$(find *)" 2>/dev/null
+if [ "$?" -eq 1 ]
+then
+    directories="$index ""$repo"
+else
+    directories="* ""$index ""$repo"
+fi
+
+find $directories -type f | sed "s/.*\///" | sort -u |
 while read f
 do
     # got all f in working dir, index and repo
