@@ -1,1 +1,120 @@
 #! /bin/dash
+
+currBranch="$(cat .tigger/HEAD)"
+currBranchFolder=.tigger/branches/$currBranch
+index=.tigger/branches/"$currBranch"/index
+repo=.tigger/branches/"$currBranch"/repo
+
+# a - file changed, different changes staged for commit -- "file in repo != file in index" and "file in index != working dir"
+# b - file changed, changes staged for commit  -- added to index but not repo, index = working dir
+# c - file changed, changes not staged for commit  -- "file in repo == file in index" but "file in index != working dir"
+# d - file deleted [Y]  -- deleted in working dir but not index (i.e. with rm command)
+# e - deleted [Y]  -- deleted in both working dir and index (i.e. with tigger-rm)
+# f - same as repo  -- file added to index and repo, all the same
+# g - added to index [Y]  -- file added to index, not repo, same with working dir
+# h - untracked -- file is not in index
+# i - file deleted, different changes staged for commit [Y]
+# j - added to index [Y] --> working dir == index, not in repo
+# k - added to index, file changed [Y] --> working dir != index, not in repo
+# l - added to index, file deleted [Y] --> in index but not in working and repo
+
+
+# in repo, index and working dir
+# * delete index --> untracked
+# * delete working dir --> deleted
+
+
+# findComm=$(find * "$index" "$repo" -type f | sed "s/.*\///" )
+# echo "$findComm"
+
+checkWorking() {
+    if [ -f "$1" ]
+    then
+        inWorking=1
+        return 0
+    fi
+    inWorking=0
+}
+
+checkIndex() {
+    if [ -f "$index"/"$1" ]
+    then
+        inIndex=1
+        return 0
+    fi
+    inIndex=0
+}
+
+checkRepo() {
+    if [ -f "$repo"/"$1" ]
+    then
+        inRepo=1
+        return 0
+    fi
+    inRepo=0
+}
+
+find * "$index" -type f | sed "s/.*\///" | sort -u |
+while read f
+do
+    # got all f in working dir, index and repo
+    # Case when file is in working directory
+    checkWorking "$f"
+    checkIndex "$f"
+    checkRepo "$f"
+    # "$inWorking"
+    # "$inIndex"
+    # "$inRepo"
+    if [ "$inWorking" -eq 1 ] && [ "$inIndex" -eq 1 ] && [ "$inRepo" -eq 1 ]
+    then
+        # compare all three of them
+        if ! diff "$f" "$index"/"$f" >/dev/null && ! diff "$index"/"$f" "$repo"/"$f" >/dev/null
+        then
+            echo "$f: file changed, different changes staged for commit"
+        elif ! diff "$index"/"$f" "$repo"/"$f" 
+        then
+            echo "$f: file changed, changes staged for commit"
+        elif ! diff "$f" "$index"/"$f"
+        then    
+            echo "$f: file changed, changes not staged for commit"
+        else
+            echo "$f: same as repo"
+        fi
+    elif [ "$inWorking" -eq 1 ] && [ "$inIndex" -eq 1 ]
+    then
+        # file not in repo
+        # compare working dir and index
+        if ! diff "$f" "$index"/"$f" >/dev/null
+        then
+            echo "$f: added to index, file changed"
+        else 
+            echo "$f: added to index"
+        fi
+    elif [ "$inWorking" -eq 1 ] && [ "$inRepo" -eq 1 ]
+    then
+        # file not in index
+        echo "$f: untracked"
+    elif [ "$inIndex" -eq 1 ] && [ "inRepo" -eq 1 ]
+    then   
+        # file not in working dir -- file deleted ? 
+        # compare index and repo
+        if ! diff "$index"/"$f" "$repo"/"$f" >/dev/null
+        then 
+            echo "$f: file deleted, different changes staged for commit"
+        else
+            echo "$f: file deleted"
+        fi
+    elif [ "$inWorking" -eq 1 ]
+    then    
+        # file not in index and repo
+        echo "$f: untracked"
+    elif [ "$inIndex" -eq 1 ]
+    then
+        # file not in working and repo
+        echo "$f: added to index, file deleted"
+    else
+        # file not in working and index
+        echo "$f: deleted"
+    fi
+
+done
