@@ -26,8 +26,13 @@
 # fi
 # echo "yes"
 
-true=1
-if "$true"
-then
-    echo true
-fi
+# true=1
+# if "$true"
+# then
+#     echo true
+# fi
+
+i=1
+j=2
+a="$i""$j"
+echo $a

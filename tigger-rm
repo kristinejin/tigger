@@ -158,11 +158,16 @@ warning() {
 }
 
 removeIndex() {
-    rm "$index"/$1
+    rm "$index"/"$1"
 }
 
+
+# NOTE: when f deleted in working directory but not index ? may solved --> test case
 removeWorkingDir() {
-    rm $1
+    if [ -f "$1" ]
+    then
+        rm "$1"
+    fi
 }
 
 # index same with repo

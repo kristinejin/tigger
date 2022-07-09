@@ -24,7 +24,7 @@ then
 fi
 
 # 3. Get new updates in directory
-#   - Change name == delete file w/old name + create new file w/ the new name
+#   - Change name == delete file w/ old name + create new file w/ the new name
 #   - Commit when with file deleted -> delete the corresponding file in index
 #   - Add everything in directory to index
 
