@@ -54,7 +54,7 @@ checkRepo() {
     inRepo=0
 }
 
-find * "$index" -type f | sed "s/.*\///" | sort -u |
+find * "$index" "$repo" -type f | sed "s/.*\///" | sort -u |
 while read f
 do
     # got all f in working dir, index and repo

@@ -32,7 +32,13 @@
 #     echo true
 # fi
 
-i=1
-j=2
-a="$i""$j"
-echo $a
+# i=1
+# j=2
+# a="$i""$j"
+# echo $a
+
+vr=temp
+for f in ./* "$vr"/*
+do 
+    basename "$f"
+done
