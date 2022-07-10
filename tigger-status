@@ -133,19 +133,3 @@ do
     fi
 
 done
-
-# $ tigger-init
-# Initialized empty tigger repository in .tigger
-# $ echo hello >a
-# $ tigger-add a
-# $ tigger-commit -m commit-0
-# Committed as commit 0
-# $ tigger-rm a
-# $ tigger-status
-# a - deleted
-# $ tigger-commit -m commit-1
-# Committed as commit 1
-# $ tigger-status
-# $ echo world >a
-# $ tigger-status
-# a - untracked
