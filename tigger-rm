@@ -87,11 +87,11 @@ do
     fi
 done
 
-# $1 must be a file name if there is only one argument
+# "$1" must be a file name if there is only one argument
 
 if [ $# -eq 1 ]
 then
-    if echo $1 | grep -E '^--.*' > /dev/null
+    if echo "$1" | grep -E '^--.*' > /dev/null
     then
         echo "usage: tigger-rm [--force] [--cached] <filenames>" 1>&2
         exit 1
@@ -101,15 +101,15 @@ then
 
 elif [ $# -eq 2 ]
 then
-    if echo $1 | grep -E '^--(force|cached)$' > /dev/null
+    if echo "$1" | grep -E '^--(force|cached)$' > /dev/null
     then
-        if echo $2 | grep -E '^--.*' > /dev/null
+        if echo "$2" | grep -E '^--.*' > /dev/null
         then  
             echo "usage: tigger-rm [--force] [--cached] <filenames>" 1>&2
             exit 1 
         fi
 
-        if [ $1 = "--force" ]
+        if [ "$1" = "--force" ]
         then
             isForce=1
         else
@@ -120,13 +120,13 @@ then
 # check for --force/--cached options when there are 3 or more arguments
 
 else 
-    if [ $1 = "--cached" ]
+    if [ "$1" = "--cached" ]
     then
         isCached=1
-    elif [ $1 = "--force" ]
+    elif [ "$1" = "--force" ]
     then
         isForce=1
-        if [ $2 = "--cached" ]
+        if [ "$2" = "--cached" ]
         then
             isCached=1
         fi
@@ -138,24 +138,24 @@ fi
 # TODO: check between repo and working directory as well 
 warning() {
     # if file in index but not in repo
-    if [ ! -f "$repo"/$1 ]
+    if [ ! -f "$repo"/"$1" ]
     then
-        if ! diff "$index"/$1 $1 >/dev/null
+        if ! diff "$index"/"$1" "$1" >/dev/null
         then
             echo "tigger-rm: error: '$1' in index is different to both the working file and the repository" 1>&2
             exit 1
         fi
         echo "tigger-rm: error: '$1' has staged changes in the index" 1>&2
         exit 1
-    elif ! diff "$index"/$1 "$repo"/$1 >/dev/null && ! diff $1 "$index"/$1 >/dev/null
+    elif ! diff "$index"/"$1" "$repo"/"$1" >/dev/null && ! diff "$1" "$index"/"$1" >/dev/null
     then
         echo "tigger-rm: error: '$1' in index is different to both the working file and the repository" 1>&2
         exit 1
-    elif ! diff "$index"/$1 "$repo"/$1 >/dev/null 
+    elif ! diff "$index"/"$1" "$repo"/"$1" >/dev/null 
     then
         echo "tigger-rm: error: '$1' has staged changes in the index" 1>&2
         exit 1
-    elif ! diff $1 "$repo"/$1 >/dev/null
+    elif ! diff "$1" "$repo"/"$1" >/dev/null
     then
         echo "tigger-rm: error: '$1' in the repository is different to the working file" 1>&2
         exit 1
