@@ -126,7 +126,8 @@ do
     then
         # file not in working and repo
         echo "$f - added to index, file deleted"
-    else
+    elif [ "$inRepo" -eq 1 ]
+    then
         # file not in working and index
         echo "$f - deleted"
     fi
