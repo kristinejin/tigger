@@ -64,6 +64,10 @@ commitSubset0 () {
     isDiff=0
     for f in "$index"/*
     do
+        if [ "$f" = "$index/*" ]
+        then
+            break
+        fi
 
         temp=$(echo "$f" | tr '/' '\n' | tail -n 1)
         repoF=$repo/$temp
@@ -91,6 +95,10 @@ commitSubset0 () {
     # Check for deleted file in index 
     for file in "$repo"/*
     do 
+        if [ "$file" = "$repo/*" ]
+        then
+            break
+        fi
         if [ ! -d "$file" ]
         then
             temp=$(echo "$file" | tr '/' '\n' | tail -n 1)
