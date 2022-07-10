@@ -1,9 +1,9 @@
 #! /usr/bin/env dash
 
 # ==============================================================================
-# test00.sh
-# Test the tigger-rm raise warning when there are chances of data lost.
-#
+# test07.sh
+# Test invalid use of tigger-rm command.
+# 
 # Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
 # Date: 8/07/2022
 # For COMP2041 Assignment 1

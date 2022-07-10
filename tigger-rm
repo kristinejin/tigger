@@ -37,14 +37,13 @@
 
 
 currBranch="$(cat .tigger/HEAD)"
-currBranchFolder=.tigger/branches/$currBranch
 index=.tigger/branches/$currBranch/index
 repo=.tigger/branches/$currBranch/repo
 
 isCached=0
 isForce=0
 
-# Check if there is a repository
+# check repository present in directory
 
 if [ ! -d ".tigger" ]
 then
@@ -80,7 +79,6 @@ for arg in "$@"
 do
     if ! echo "$arg" | grep -E '^--.*' >/dev/null
     then 
-        ## check if in index
         if [ ! -f "$index"/"$arg" ]
         then
             echo "tigger-rm: error: '$arg' is not in the tigger repository" 1>&2
@@ -136,7 +134,7 @@ else
 fi
 
 # Given a file name ($1) in index, check if it's commited to repo
-# If not, raise an error
+# If not, raise a warning
 # TODO: check between repo and working directory as well 
 warning() {
     # if file in index but not in repo
