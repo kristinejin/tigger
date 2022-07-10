@@ -1,10 +1,20 @@
 #! /bin/dash
 
-#! /bin/dash
+# ==============================================================================
+# tigger-rm.sh
+# Implementation of tigger-rm command.
+#
+# Removes files in index and/or in working directory
+#
+# Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
+# Date: 8/07/2022
+# For COMP2041 Assignment 1
+# ==============================================================================
 
-#####################
-### Functionality ###
-#####################
+# ==============================================================================
+# DEVELOPER NOTES
+#
+# Functionality
 # * tigger-rm (without option): rm file in index and directory (can be multiple files)
 #   -> give warning for files in unstaged changes 
 #       -> file in index not present in repo 
@@ -16,23 +26,24 @@
 #   -> no warning will occur
 # * --force
 #   -> ignore any warning, and continue removing file in curr dir and index
-
-#####################
-####### Error #######
-#####################
+#
+# Error
+# 
 # * tigger-rm: error: 'a' has staged changes in the index
 #   -> when 'a' in current directory and index but not in repo
-
+# 
 # * tigger-rm: error: 'a' in the repository is different to the working file
 #   -> when changes not add to index but repo have a track of that file
-
+# 
 # * tigger-rm: error: 'a' in index is different to both the working file and the repository
 #   -> combination of both
-
+# 
 # * tigger-rm: error: 'a' is not in the tigger repository
 #   -> when 'a' is in current directory but not index
-
+# 
 # * no error when 'a' not in current directory but in index
+# 
+# ==============================================================================
 
 
 

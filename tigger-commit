@@ -1,18 +1,15 @@
 #! /bin/dash
 
-################################################
-################## Doc String ##################
-################################################
-
-# Desceiption: The tigger-commit command saves a copy of all files in the index to the repository.
-
-# Each commit will be record to a log file and all the files in that commit will be saved in a sub-directory name with commit index
-#   -> index sub-directory name: .commit$numOfCommit
-#   e.g. index directory of commit 6 will be .commit6
-
-################################################
-################################################
-################################################
+# ==============================================================================
+# tigger-commit.sh
+# Implementation of tigger-commit command.
+#
+# Saves a copy of all files in the index to the repository.
+#
+# Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
+# Date: 8/07/2022
+# For COMP2041 Assignment 1
+# ==============================================================================
 
 # Initial checks to make sure .tigger have been intialized
 if [ ! -d ".tigger" ]
@@ -21,18 +18,13 @@ then
     exit 1
 fi 
 
-################################################
-################# GLOBAL VALUE #################
-################################################
+# Constant variables
 
 currBranch="$(cat .tigger/HEAD)"
 currBranchFolder=.tigger/branches/$currBranch
 index=.tigger/branches/$currBranch/index
 repo=.tigger/branches/$currBranch/repo
 
-################################################
-################################################
-################################################
 
 # Error Checking 
 # 1. Insufficient arguments 

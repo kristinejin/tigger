@@ -1,7 +1,15 @@
 #! /bin/dash
 
-# add files to index
-# only ordinary file can be added
+# ==============================================================================
+# tigger-add.sh
+# Implementation of tigger-add command.
+#
+# Add files to staging area
+#
+# Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
+# Date: 3/07/2022
+# For COMP2041 Assignment 1
+# ==============================================================================
 
 # Error checking
 # tigger-add: error: tigger repository directory .tigger not found

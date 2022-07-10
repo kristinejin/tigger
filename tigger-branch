@@ -1,0 +1,96 @@
+#! /bin/dash
+
+# ==============================================================================
+# tigger-branch.sh
+# Implementation of tigger-branch [-d] [branch-name] command.
+#
+# Either creates a branch, deletes a branch, or lists current branch names.
+#
+# Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
+# Date: 9/07/2022
+# For COMP2041 Assignment 1
+# ==============================================================================
+
+# Constant variable
+
+# currBranch="$(cat .tigger/HEAD)"
+# index=.tigger/branches/$currBranch/index
+# repo=.tigger/branches/$currBranch/repo
+branchLog=.tigger/branches/branchLog
+
+# Initial checks to make sure .tigger have been intialized
+if [ ! -d ".tigger" ]
+then
+    echo "tigger-branch: error: tigger repository directory .tigger not found" 1>&2
+    exit 1
+fi 
+
+# List all the branch in this repo
+listBranch() {
+    cat < "$branchLog" | sort 
+}
+
+# Create a new branch with given name ($1)
+createBranch() {
+    check="$(listBranch | grep -E "^$1$" 2>/dev/null)"
+    if [ ! -z "$check" ]
+    then
+        echo "tigger-branch: error: branch '$1' already exists" 1>&2
+        exit 1
+    else
+        # create record branch in branchLog
+        echo "$1" >> .tigger/branches/branchLog
+        # create directory for master
+        mkdir .tigger/branches/"$1"
+        # create empty log file in master branch
+        touch .tigger/branches/"$1"/log
+        # create repo for master branch
+        mkdir .tigger/branches/"$1"/repo
+        # create index directory for master branch
+        mkdir .tigger/branches/"$1"/index
+        cp -r .tigger/branches/master/index .tigger/branches/"$1"/index
+    fi
+}
+
+# Remove branch with given branch name
+# Deleted branch 'b'
+removeBranch() {
+    if [ "$1" = 'master' ]
+    then
+        echo "tigger-branch: error: can not delete branch 'master'" 1>&2
+        exit 1
+    elif ! listBranch | grep -E "^$1$" >/dev/null 2>/dev/null
+    then
+        echo "tigger-branch: error: branch '$1' doesn't exist" 1>&2
+        exit 1
+    else
+        # remove branch ..
+        pathToBranch=.tigger/branches/"$1"
+        rm -r "$pathToBranch"
+        # listBranch | grep -Ev "^$1$"
+        listBranch | grep -Ev "^$1\$" > tmpfile && mv tmpfile "$branchLog"
+        echo "Deleted branch '$1'"
+    fi
+}
+
+case "$#" in 
+0) listBranch ;; 
+1) 
+    if [ "$1" = '-d' ] 
+    then
+        echo "tigger-branch: error: branch name required" 1>&2
+        exit 1
+    else        
+        createBranch "$1"
+    fi
+    ;;
+2) 
+    if [ "$1" = '-d' ] 
+    then
+        removeBranch "$2"
+    else 
+        echo "usage: tigger-branch [-d] <branch>"
+        exit 1
+    fi
+    ;;
+esac

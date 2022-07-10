@@ -2,7 +2,7 @@
 
 # ==============================================================================
 # test00.sh
-# Test tigger-log and tigger-show
+# Test the tigger-log command.
 #
 # Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
 # Date: 1/07/2022
@@ -49,7 +49,17 @@ fi
 ###                     Starter Code End                       ###
 ##################################################################
 
-# Check that invalid use of tigger-show give an error
+# check commit record in log
+
+cat > "$expected_output" <<EOF
+EOF
+
+tigger-log > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
 
 # Create a simple file.
 
@@ -61,19 +71,6 @@ cat > "$expected_output" <<EOF
 EOF
 
 tigger-add a > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check file in index
-
-cat > "$expected_output" <<EOF
-line 1
-EOF
-
-tigger-show :a > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
@@ -93,19 +90,6 @@ if ! diff "$expected_output" "$actual_output"; then
     exit 1
 fi
 
-# check file in commit 0
-
-cat > "$expected_output" <<EOF
-line 1
-EOF
-
-tigger-show 0:a > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
 # check commit record in log
 
 cat > "$expected_output" <<EOF
@@ -119,11 +103,7 @@ if ! diff "$expected_output" "$actual_output"; then
     exit 1
 fi
 
-# add a new file
-
-echo "hello" > b
-
-# make changes to previous fil 
+# make changes to previous file
 
 echo "line 2" >> a
 
@@ -132,34 +112,7 @@ echo "line 2" >> a
 cat > "$expected_output" <<EOF
 EOF
 
-tigger-add a b > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check 'a' in staging area
-
-cat > "$expected_output" <<EOF
-line 1
-line 2
-EOF
-
-tigger-show :a > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check 'b' in staging area
-
-cat > "$expected_output" <<EOF
-hello
-EOF
-
-tigger-show :b > "$actual_output" 2>&1
+tigger-add a > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
@@ -179,30 +132,81 @@ if ! diff "$expected_output" "$actual_output"; then
     exit 1
 fi
 
-# check 'a' and 'b' in commit 1
+# make changes to previous file
 
+echo "line 1" >> b
+echo "line 1" >> c
+echo "line 1" >> d
 
-# check 'a' in staging area
+# add files to staging area
 
 cat > "$expected_output" <<EOF
-line 1
-line 2
 EOF
 
-tigger-show 1:a > "$actual_output" 2>&1
+tigger-add b > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# check 'b' in staging area
+# save changes to repository
 
 cat > "$expected_output" <<EOF
-hello
+Committed as commit 2
 EOF
 
-tigger-show 1:b > "$actual_output" 2>&1
+tigger-commit -m 'third commit' > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# add files to staging area
+
+cat > "$expected_output" <<EOF
+EOF
+
+tigger-add c > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# save changes to repository
+
+cat > "$expected_output" <<EOF
+Committed as commit 3
+EOF
+
+tigger-commit -m 'forth commit' > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# add files to staging area
+
+cat > "$expected_output" <<EOF
+EOF
+
+tigger-add d > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# save changes to repository
+
+cat > "$expected_output" <<EOF
+Committed as commit 4
+EOF
+
+tigger-commit -m 'fifth commit' > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
@@ -211,8 +215,10 @@ fi
 
 # check tigger-log print in descending order
 
-
 cat > "$expected_output" <<EOF
+4 fifth commit
+3 forth commit
+2 third commit
 1 second commit
 0 first commit
 EOF
@@ -227,4 +233,4 @@ fi
 
 # END OF TEST
 
-echo "Test00 (tigger-log tigger-show): Passed!"
+echo "Test00 (tigger-log): Passed!"

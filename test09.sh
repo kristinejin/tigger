@@ -1,8 +1,9 @@
 #! /usr/bin/env dash
 
 # ==============================================================================
-# test00.sh
-# Test the tigger-rm raise warning when there are chances of data lost.
+# test09.sh
+#
+# Test tigger-branch list, create delete branch
 #
 # Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
 # Date: 8/07/2022
@@ -49,6 +50,60 @@ fi
 ###                     Starter Code End                       ###
 ##################################################################
 
+# create a new branch
+
+cat > "$expected_output" <<EOF
+EOF
+
+tigger-branch "branch1" > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# list branches 
+
+cat > "$expected_output" <<EOF
+branch1
+master
+EOF
+
+tigger-branch > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# remove branch
+
+cat > "$expected_output" <<EOF
+Deleted branch 'branch1'
+EOF
+
+tigger-branch -d branch1 > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# list branches 
+
+cat > "$expected_output" <<EOF
+master
+EOF
+
+tigger-branch > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+
+
 # END OF TEST
 
-echo "Test09 (description): Passed"
+echo "Test09 (tigger-branch): Passed!"

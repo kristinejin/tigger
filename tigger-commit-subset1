@@ -1,5 +1,15 @@
 #! /bin/dash
 
+# ==============================================================================
+# tigger-commit-subset1.sh
+# Implementation of tigger-commit -a -m command.
+#
+# Update files in index and commit to repository
+#
+# Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
+# Date: 8/07/2022
+# For COMP2041 Assignment 1
+# ==============================================================================
 
 currBranch="$(cat .tigger/HEAD)"
 index=.tigger/branches/$currBranch/index

@@ -1,5 +1,16 @@
 #! /bin/dash
 
+# ==============================================================================
+# tigger-log.sh
+# Implementation of tigger-log command.
+#
+# Print the log of current branch in descending order
+#
+# Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
+# Date: 5/07/2022
+# For COMP2041 Assignment 1
+# ==============================================================================
+
 if [ ! -d ".tigger" ]
 then
     echo "$0: error: tigger repository directory .tigger not found" 1>&2

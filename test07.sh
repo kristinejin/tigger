@@ -2,7 +2,8 @@
 
 # ==============================================================================
 # test07.sh
-# Test invalid use of tigger-rm command.
+# 
+# description...
 # 
 # Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
 # Date: 8/07/2022

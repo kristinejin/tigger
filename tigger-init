@@ -1,5 +1,16 @@
 #! /bin/dash
 
+# ==============================================================================
+# tigger-init.sh
+# Implementation of tigger-init command.
+#
+# Initialise .tigger repository .tigger
+#
+# Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
+# Date: 8/07/2022
+# For COMP2041 Assignment 1
+# ==============================================================================
+
 dirName=".tigger"
 
 
@@ -15,15 +26,17 @@ initbranch="master"
 mkdir $dirName
 # create branches directory inside .tigger
 mkdir $dirName/branches
+# create branches directory inside .tigger
+echo "master" > $dirName/branches/branchLog
 # create directory for master
 mkdir $dirName/branches/$initbranch
 # create empty log file in master branch
 touch $dirName/branches/$initbranch/log
 # create repo for master branch
 mkdir $dirName/branches/$initbranch/repo
-# set HEAD to master
-echo "$initbranch" > $dirName/HEAD
 # create index directory for master branch
 mkdir $dirName/branches/$initbranch/index
+# set HEAD to master
+echo "$initbranch" > $dirName/HEAD
 # finish initialisation 
 echo "Initialized empty tigger repository in $dirName"

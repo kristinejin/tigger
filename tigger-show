@@ -1,7 +1,7 @@
 #! /bin/dash
 
 # ==============================================================================
-# tigger-status.sh
+# tigger-show.sh
 # Implementation of tigger-show command.
 #
 # Print the contents of the specified filename as of the specified commit. 
