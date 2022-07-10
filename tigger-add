@@ -7,13 +7,14 @@
 # tigger-add: error: tigger repository directory .tigger not found
 if [ ! -d ".tigger" ]
 then
-    echo "$0: error: tigger repository directory .tigger not found" 1>&2
+    echo "tigger-add: error: tigger repository directory .tigger not found" 1>&2
     exit 1
 fi 
 
 if [ $# -eq 0 ]
 then
-    echo "usage: tigger-add <filenames>"
+    echo "usage: tigger-add <filenames>" 1>&2
+    exit 1
 fi
 
 branch="$(cat .tigger/HEAD)"
@@ -26,7 +27,7 @@ do
         then
             rm "$index"/"$f"
         else
-            echo "$0: error: can not open '$f'" 1>&2
+            echo "tigger-add: error: can not open '$f'" 1>&2
             exit 1
         fi
     else

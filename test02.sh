@@ -1,11 +1,11 @@
 #! /usr/bin/env dash
 
 # ==============================================================================
-# test00.sh
-# Test tigger-log and tigger-show
+# test02.sh
+# Test proper use of tigger-rm command without --force or --cached.
 #
 # Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
-# Date: 1/07/2022
+# Date: 2/07/2022
 # For COMP2041 Assignment 1
 # ==============================================================================
 
@@ -49,175 +49,126 @@ fi
 ###                     Starter Code End                       ###
 ##################################################################
 
-# Check that invalid use of tigger-show give an error
 
 # Create a simple file.
 
-echo "line 1" > a
+echo "line 1" > test
 
 # add a file to the repository staging area
 
 cat > "$expected_output" <<EOF
 EOF
 
-tigger-add a > "$actual_output" 2>&1
+tigger-add test > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# check file in index
-
-cat > "$expected_output" <<EOF
-line 1
-EOF
-
-tigger-show :a > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# commit the file to the repository history
-
+# commit the file to repo
 cat > "$expected_output" <<EOF
 Committed as commit 0
 EOF
 
-tigger-commit -m 'first commit' > "$actual_output" 2>&1
+tigger-commit -m "first commit" > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# check file in commit 0
-
-cat > "$expected_output" <<EOF
-line 1
-EOF
-
-tigger-show 0:a > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check commit record in log
-
-cat > "$expected_output" <<EOF
-0 first commit
-EOF
-
-tigger-log > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# add a new file
-
-echo "hello" > b
-
-# make changes to previous fil 
-
-echo "line 2" >> a
-
-# add files to staging area
+# remove file in current directory and staging area
 
 cat > "$expected_output" <<EOF
 EOF
 
-tigger-add a b > "$actual_output" 2>&1
+tigger-rm test > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# check 'a' in staging area
+# check if file in staging area have been removed successfully
 
 cat > "$expected_output" <<EOF
-line 1
-line 2
+tigger-show: error: 'test' not found in index
 EOF
 
-tigger-show :a > "$actual_output" 2>&1
+tigger-show :test > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# check 'b' in staging area
+# check if file in working directory have been removed successfully
+cat > "$expected_output" <<EOF
+find: test: No such file or directory
+EOF
+
+find test > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# NOTE: when f deleted in working directory but not index ? may solved --> test case
+
+# restore test file
+
+echo "restore" > test
+
+# add test file to staging area
 
 cat > "$expected_output" <<EOF
-hello
 EOF
 
-tigger-show :b > "$actual_output" 2>&1
+tigger-add test > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# save changes to repository
+# add test file to repository
 
 cat > "$expected_output" <<EOF
 Committed as commit 1
 EOF
 
-tigger-commit -m 'second commit' > "$actual_output" 2>&1
+tigger-commit -m "second commit" > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
+    echo "Failed test, 145"
     exit 1
 fi
 
-# check 'a' and 'b' in commit 1
+# remove file in working directory
 
+rm test
 
-# check 'a' in staging area
+# remove file using tigger-rm
 
 cat > "$expected_output" <<EOF
-line 1
-line 2
 EOF
 
-tigger-show 1:a > "$actual_output" 2>&1
+tigger-rm test > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
+    echo "Failed test, 161"
     exit 1
 fi
 
-# check 'b' in staging area
+# check file been removed in index
 
 cat > "$expected_output" <<EOF
-hello
+tigger-show: error: 'test' not found in index
 EOF
 
-tigger-show 1:b > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check tigger-log print in descending order
-
-
-cat > "$expected_output" <<EOF
-1 second commit
-0 first commit
-EOF
-
-tigger-log > "$actual_output" 2>&1
+tigger-show :test > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
@@ -227,4 +178,4 @@ fi
 
 # END OF TEST
 
-echo "Test00 (tigger-log tigger-show): Passed!"
+echo "Test02 (tigger-rm simple): Passed!"

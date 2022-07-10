@@ -17,9 +17,8 @@ log=.tigger/branches/$currBranch/log
 
 # Errors:
 
-
 # 1. "usage: tigger-show <commit>:<filename>" >> multiple arguments | no arguments
-case $# in
+case "$#" in
 0) 
     echo "usage: tigger-show <commit>:<filename>"  
     exit 1
@@ -48,7 +47,7 @@ esac
 commit() {
     if [ ! -f "$index"/.commit$1/$2 ]
     then
-        echo "tigger-show: error: '$2' not found in commit $1"
+        echo "tigger-show: error: '$2' not found in commit $1" 1>&2
         exit 1
     fi
     cat < "$index"/.commit"$1"/"$2"
@@ -59,7 +58,7 @@ commit() {
 index() {
     if [ ! -f "$index"/$1 ]
     then
-        echo "tigger-show: error: '$1' not found in index"
+        echo "tigger-show: error: '$1' not found in index" 1>&2
         exit 1
     fi
     cat < "$index"/"$1"
@@ -73,7 +72,7 @@ else
     # check if commit can be found
     if ! cat < "$log" | cut -d' ' -f1 | grep -E "^$commit$" > /dev/null
     then
-        echo "tigger-show: error: unknown commit '$commit'"
+        echo "tigger-show: error: unknown commit '$commit'" 1>&2
         exit 1
     fi
     commit "$commit" "$fname"

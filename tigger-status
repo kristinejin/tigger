@@ -1,37 +1,51 @@
 #! /bin/dash
 
-# Initial checks to make sure .tigger have been intialized
+# ==============================================================================
+# tigger-status.sh
+# Implementation of tigger-status command.
+#
+# Gives status of all files associate with current working directory and repo
+#
+# Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
+# Date: 9/07/2022
+# For COMP2041 Assignment 1
+# ==============================================================================
+
+# ==============================================================================
+# Developer note 
+#
+# All possible cases: 
+#
+# a - file changed, different changes staged for commit --> "file in repo != file in index" and "file in index != working dir"
+# b - file changed, changes staged for commit           --> added to index but not repo, index = working dir
+# c - file changed, changes not staged for commit       --> "file in repo == file in index" but "file in index != working dir"
+# d - file deleted      --> deleted in working dir but not index (i.e. with rm command)
+# e - file deleted, different changes staged for commit
+# f - deleted [Y]       --> deleted in both working dir and index (i.e. with tigger-rm)
+# g - same as repo      --> file added to index and repo, all the same
+# h - added to index    --> working dir == index, not in repo
+# i - added to index, file changed          --> working dir != index, not in repo
+# j - added to index, file deleted          --> in index but not in working and repo
+# k - untracked         --> file is not in index
+# l - untracked         --> file is in working and repo, deleted in index
+#
+# ==============================================================================
+
+###   Check tigger repository initialization   ###
+
 if [ ! -d ".tigger" ]
 then
     echo "$0: error: tigger repository directory .tigger not found" 1>&2
     exit 1
 fi 
 
+###  Constant Variables  ### 
+
 currBranch="$(cat .tigger/HEAD)"
 index=.tigger/branches/"$currBranch"/index
 repo=.tigger/branches/"$currBranch"/repo
 
-# a - file changed, different changes staged for commit -- "file in repo != file in index" and "file in index != working dir"
-# b - file changed, changes staged for commit  -- added to index but not repo, index = working dir
-# c - file changed, changes not staged for commit  -- "file in repo == file in index" but "file in index != working dir"
-# d - file deleted [Y]  -- deleted in working dir but not index (i.e. with rm command)
-# e - deleted [Y]  -- deleted in both working dir and index (i.e. with tigger-rm)
-# f - same as repo  -- file added to index and repo, all the same
-# g - added to index [Y]  -- file added to index, not repo, same with working dir
-# h - untracked -- file is not in index
-# i - file deleted, different changes staged for commit [Y]
-# j - added to index [Y] --> working dir == index, not in repo
-# k - added to index, file changed [Y] --> working dir != index, not in repo
-# l - added to index, file deleted [Y] --> in index but not in working and repo
-
-
-# in repo, index and working dir
-# * delete index --> untracked
-# * delete working dir --> deleted
-
-
-# findComm=$(find * "$index" "$repo" -type f | sed "s/.*\///" )
-# echo "$findComm"
+# given a file name ($1) check if file exist in working directory
 
 checkWorking() {
     if [ -f "$1" ]
@@ -42,6 +56,8 @@ checkWorking() {
     inWorking=0
 }
 
+# given a file name ($1) check if file exist in staging area
+
 checkIndex() {
     if [ -f "$index"/"$1" ]
     then
@@ -50,6 +66,8 @@ checkIndex() {
     fi
     inIndex=0
 }
+
+# given a file name ($1) check if file exist in repository
 
 checkRepo() {
     if [ -f "$repo"/"$1" ]
@@ -60,76 +78,121 @@ checkRepo() {
     inRepo=0
 }
 
-checkCurrrDir="$(find *)" 2>/dev/null
-if [ "$?" -eq 1 ]
+# check if current directory is empty
+
+find * >/dev/null 2>/dev/null
+if [ "$?" -ne 0 ]
 then
     directories="$index ""$repo"
 else
     directories="* ""$index ""$repo"
 fi
 
+# glob all files in working directory, staging area and repo 
+# sort the files in alphabetical order before other process
+
 find $directories -type f | sed "s/.*\///" | sort -u |
-while read f
+while read -r f
 do
-    # got all f in working dir, index and repo
-    # Case when file is in working directory
+
     checkWorking "$f"
     checkIndex "$f"
     checkRepo "$f"
-    # "$inWorking"
-    # "$inIndex"
-    # "$inRepo"
+
+    # Case 1: file present in all three stages
+
     if [ "$inWorking" -eq 1 ] && [ "$inIndex" -eq 1 ] && [ "$inRepo" -eq 1 ]
     then
-        # compare all three of them
+        # compare all stages
+
+        # a. file have different version in working directory and staging area, 
+        #   and changes staging area are to be commited to repository
+
         if ! diff "$f" "$index"/"$f" >/dev/null && ! diff "$index"/"$f" "$repo"/"$f" >/dev/null
         then
             echo "$f - file changed, different changes staged for commit"
+
+        # b. all changes have been added to staging area, changes staging area are to ben commited to repository
+
         elif ! diff "$index"/"$f" "$repo"/"$f" >/dev/null
         then
             echo "$f - file changed, changes staged for commit"
+        
+        # c. update to file in working directory have not been added to staging area yet
+        #   staging area have been commited to repository
+
         elif ! diff "$f" "$index"/"$f" >/dev/null
         then    
             echo "$f - file changed, changes not staged for commit"
+        
+        # d. all three stages have the same version
+
         else
             echo "$f - same as repo"
         fi
+
+    # Case 2: file present in working directory and staging area
+
     elif [ "$inWorking" -eq 1 ] && [ "$inIndex" -eq 1 ]
     then
+
         # file not in repo
-        # compare working dir and index
+        # compare working dir and staging area
+
         if ! diff "$f" "$index"/"$f" >/dev/null
         then
             echo "$f - added to index, file changed"
         else 
             echo "$f - added to index"
         fi
+
+    # Case 3: file present in working directory and repository
+
     elif [ "$inWorking" -eq 1 ] && [ "$inRepo" -eq 1 ]
     then
         # file not in index
+
         echo "$f - untracked"
+    
+    # Case 4: file present in staging area and repository
+
     elif [ "$inIndex" -eq 1 ] && [ "$inRepo" -eq 1 ]
     then   
-        # file not in working dir -- file deleted ? 
+        # file not in working dir
         # compare index and repo
+
         if ! diff "$index"/"$f" "$repo"/"$f" >/dev/null
         then 
             echo "$f - file deleted, different changes staged for commit"
         else
             echo "$f - file deleted"
         fi
+    
+    # Case 5: file present in working directory 
+    
     elif [ "$inWorking" -eq 1 ]
     then    
-        # file not in index and repo
+        # file not in staging area and repo
+
         echo "$f - untracked"
+
+    # Case 6: file present in staging area
+
     elif [ "$inIndex" -eq 1 ]
     then
-        # file not in working and repo
+        # file not in working directory and repo
+
         echo "$f - added to index, file deleted"
+    
+    # Case 7: file present in repository
+
     elif [ "$inRepo" -eq 1 ]
     then
-        # file not in working and index
+        # file not in working directory and staging area
+
         echo "$f - deleted"
     fi
+
+    # (Hidden) Case 8: when there's no file in any stage, do nothing
 
 done

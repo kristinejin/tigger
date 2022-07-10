@@ -2,12 +2,11 @@
 
 
 currBranch="$(cat .tigger/HEAD)"
-currBranchFolder=.tigger/branches/$currBranch
 index=.tigger/branches/$currBranch/index
 repo=.tigger/branches/$currBranch/repo
 commitMsg=$1
 
-# 1. Index is empty
+# 1. Check when index is when empty
 isEmpty=0
 for f in "$index"/*
 do 
@@ -17,11 +16,28 @@ do
     fi
 done
 
+checkRepo=0
+for f in "$repo"/*
+do 
+    if [ -f "$f" ] && [ "$isEmpty" -eq 0 ]
+    then
+        # rm "$f"
+        checkRepo=1
+    fi
+done
+
+if [ "$isEmpty" -eq 0 ] && [ "$checkRepo" -eq 1 ]
+then
+    tigger-commit -m "$commitMsg"
+    exit "$?"
+fi
+
 if [ "$isEmpty" -eq 0 ]
 then
     echo "nothing to commit"
     exit 0
 fi
+
 
 # 3. Get new updates in directory
 #   - Change name == delete file w/ old name + create new file w/ the new name

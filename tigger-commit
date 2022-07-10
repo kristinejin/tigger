@@ -17,7 +17,7 @@
 # Initial checks to make sure .tigger have been intialized
 if [ ! -d ".tigger" ]
 then
-    echo "$0: error: tigger repository directory .tigger not found" 1>&2
+    echo "tigger-commit: error: tigger repository directory .tigger not found" 1>&2
     exit 1
 fi 
 
@@ -123,21 +123,30 @@ commitSubset0 () {
     count=0
     commitFolder=".commit$count"
     #   Retrive the last commit index in log file (if log file is not empty) and increment to get current commit index
-    T=$(sed -e 's/\s//g' "$currBranchFolder/log")
+    T=$(sed -e 's/\s//g' "$currBranchFolder"/log)
     if [ -n "$T" ]
     then 
-        count=$(tail -1 "$currBranchFolder/log" | cut -d' ' -f 1)
+        count=$(tail -1 "$currBranchFolder"/log | cut -d' ' -f 1)
         count=$((count+1))
         commitFolder=".commit$count"
     fi
+
     #   Make a new sub-directory for this commit inside index and copy all files in index to this sub-directory
+
     mkdir "$index"/"$commitFolder"
+
+    # find "$index" type -f >/dev/null 2>/dev/null
+
+    # if [ "$?" -eq 0 ]
+    # then
     cp -f "$index"/* "$index"/"$commitFolder" 2>/dev/null
+    # fi
 
     # 3. record this commit with commit index and commit message to log
     #   log format: 0 commit message
     # TODO: backslash escape???? 
-    echo "$count $commitMsg" >> "$currBranchFolder/log"
+
+    echo "$count $commitMsg" >> "$currBranchFolder"/log
 
     # 4. A message to standard output for users
     echo "Committed as commit $count"
