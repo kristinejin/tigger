@@ -1,11 +1,11 @@
 #! /usr/bin/env dash
 
 # ==============================================================================
-# test00.sh
-# Test tigger-log and tigger-show
+# test06.sh
+# Test invalid use of tigger-add and tigger-commit
 #
 # Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
-# Date: 1/07/2022
+# Date: 8/07/2022
 # For COMP2041 Assignment 1
 # ==============================================================================
 
@@ -31,6 +31,49 @@ actual_output="$(mktemp)"
 
 trap 'rm "$expected_output" "$actual_output" && cd .. && rm -rf "$test_dir"' INT HUP QUIT TERM EXIT
 
+
+##################################################################
+###                     Starter Code End                       ###
+##################################################################
+
+# make a new file
+
+echo 1 > a
+
+# Use tigger commands without a repository
+
+cat > "$expected_output" <<EOF
+tigger-add: error: tigger repository directory .tigger not found
+EOF
+
+tigger-add a > "$actual_output" 2>&1
+
+# if [ "$?" -eq 0 ]; then
+#     echo "Failed test"
+#     exit 1
+# fi
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+cat > "$expected_output" <<EOF
+tigger-commit: error: tigger repository directory .tigger not found
+EOF
+
+tigger-commit -m "invalid" > "$actual_output" 2>&1
+
+if [ "$?" -eq 0 ]; then
+    echo "Failed test"
+    exit 1
+fi
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
 # Create tigger repository
 
 cat > "$expected_output" <<EOF
@@ -44,18 +87,43 @@ if ! diff "$expected_output" "$actual_output"; then
     exit 1
 fi
 
+# use tigger-add with no argument
 
-##################################################################
-###                     Starter Code End                       ###
-##################################################################
+cat > "$expected_output" <<EOF
+usage: tigger-add <filenames>
+EOF
 
-# Check that invalid use of tigger-show give an error
+tigger-add > "$actual_output" 2>&1
 
-# Create a simple file.
+if [ "$?" -eq 0 ]; then
+    echo "Failed test"
+    exit 1
+fi
 
-echo "line 1" > a
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
 
-# add a file to the repository staging area
+# add non-existant file 
+
+cat > "$expected_output" <<EOF
+tigger-add: error: can not open 'nonexistant'
+EOF
+
+tigger-add nonexistant > "$actual_output" 2>&1
+
+if [ "$?" -eq 0 ]; then
+    echo "Failed test"
+    exit 1
+fi
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# add a valid file to staging area
 
 cat > "$expected_output" <<EOF
 EOF
@@ -67,164 +135,56 @@ if ! diff "$expected_output" "$actual_output"; then
     exit 1
 fi
 
-# check file in index
+# Invalid commit option
 
 cat > "$expected_output" <<EOF
-line 1
+usage: tigger-commit [-a] -m commit-message
 EOF
 
-tigger-show :a > "$actual_output" 2>&1
+tigger-commit -l -m "invalid" > "$actual_output" 2>&1
+
+if [ "$?" -eq 0 ]; then
+    echo "Failed test"
+    exit 1
+fi
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# commit the file to the repository history
-
 cat > "$expected_output" <<EOF
-Committed as commit 0
+usage: tigger-commit [-a] -m commit-message
 EOF
 
-tigger-commit -m 'first commit' > "$actual_output" 2>&1
+tigger-commit -m > "$actual_output" 2>&1
+
+if [ "$?" -eq 0 ]; then
+    echo "Failed test"
+    exit 1
+fi
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# check file in commit 0
-
 cat > "$expected_output" <<EOF
-line 1
+usage: tigger-commit [-a] -m commit-message
 EOF
 
-tigger-show 0:a > "$actual_output" 2>&1
+tigger-commit "helo" > "$actual_output" 2>&1
+
+if [ "$?" -eq 0 ]; then
+    echo "Failed test"
+    exit 1
+fi
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
-
-# check commit record in log
-
-cat > "$expected_output" <<EOF
-0 first commit
-EOF
-
-tigger-log > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# add a new file
-
-echo "hello" > b
-
-# make changes to previous fil 
-
-echo "line 2" >> a
-
-# add files to staging area
-
-cat > "$expected_output" <<EOF
-EOF
-
-tigger-add a b > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check 'a' in staging area
-
-cat > "$expected_output" <<EOF
-line 1
-line 2
-EOF
-
-tigger-show :a > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check 'b' in staging area
-
-cat > "$expected_output" <<EOF
-hello
-EOF
-
-tigger-show :b > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# save changes to repository
-
-cat > "$expected_output" <<EOF
-Committed as commit 1
-EOF
-
-tigger-commit -m 'second commit' > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check 'a' and 'b' in commit 1
-
-
-# check 'a' in staging area
-
-cat > "$expected_output" <<EOF
-line 1
-line 2
-EOF
-
-tigger-show 1:a > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check 'b' in staging area
-
-cat > "$expected_output" <<EOF
-hello
-EOF
-
-tigger-show 1:b > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check tigger-log print in descending order
-
-
-cat > "$expected_output" <<EOF
-1 second commit
-0 first commit
-EOF
-
-tigger-log > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
 
 # END OF TEST
 
-echo "Test00 (tigger-log tigger-show): Passed!"
+echo "Test06 (tigger-commit add erros): Passed!"

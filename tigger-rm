@@ -45,6 +45,7 @@ isCached=0
 isForce=0
 
 # Check if there is a repository
+
 if [ ! -d ".tigger" ]
 then
     echo "tigger-rm: error: tigger repository directory .tigger not found" 1>&2
@@ -52,6 +53,7 @@ then
 fi 
 
 # Check sufficient arguments
+
 if [ $# -eq 0 ]
 then
     echo "usage: tigger-rm [--force] [--cached] <filenames>" 1>&2
@@ -59,6 +61,7 @@ then
 fi
 
 # Check if there are invalid arguments, e.g. --hello
+
 for arg in "$@"
 do
     if echo "$arg" | grep -E "^--.*" >/dev/null
@@ -72,6 +75,7 @@ do
 done
 
 # Check if all passed in files are in index
+
 for arg in "$@"
 do
     if ! echo "$arg" | grep -E '^--.*' >/dev/null
@@ -86,6 +90,7 @@ do
 done
 
 # $1 must be a file name if there is only one argument
+
 if [ $# -eq 1 ]
 then
     if echo $1 | grep -E '^--.*' > /dev/null
@@ -93,7 +98,9 @@ then
         echo "usage: tigger-rm [--force] [--cached] <filenames>" 1>&2
         exit 1
     fi
+
 # Check valid arguments
+
 elif [ $# -eq 2 ]
 then
     if echo $1 | grep -E '^--(force|cached)$' > /dev/null
@@ -111,8 +118,10 @@ then
             isCached=1
         fi
     fi
+
+# check for --force/--cached options when there are 3 or more arguments
+
 else 
-    ##### check for force and cached
     if [ $1 = "--cached" ]
     then
         isCached=1
@@ -178,15 +187,36 @@ for f in "$@"
 do 
     if ! echo "$f" | grep -E '^--.*' >/dev/null
     then
-        ### do something 
+        
+        # Case 1: no options (no --force/--cached)
+        
         if [ "$isForce" -ne 1 ] && [ "$isCached" -ne 1 ]
         then
-            warning "$f"
-            removeIndex "$f"
-            removeWorkingDir "$f"
+
+            # file found in index but not working directory
+
+            if [ ! -f "$f" ]
+            then
+                removeIndex "$f"
+            
+            # call functions to check for file lost and perform removing files
+            else
+                warning "$f"
+
+                removeIndex "$f"
+
+                removeWorkingDir "$f"
+            fi
+        
+        # Case 2: both --force and --chached present
+
         elif [ "$isForce" -eq 1 ] && [ "$isCached" -eq 1 ]
         then    
+
             removeIndex "$f"
+        
+        # Case 3: only --cached present
+
         elif [ "$isCached" -eq 1 ] 
         then
             if [ ! -f "$repo"/"$f" ]
@@ -204,7 +234,11 @@ do
                     exit 1
                 fi
             fi
+
             removeIndex "$f"
+
+        # Case 4: only --cached present
+
         elif [ "$isForce" -eq 1 ]
         then
             removeIndex "$f"

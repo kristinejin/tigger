@@ -1,8 +1,8 @@
 #! /usr/bin/env dash
 
 # ==============================================================================
-# test00.sh
-# Test tigger-log and tigger-show
+# test01.sh
+# Test tigger-rm raise warning when there are chances of data lost.
 #
 # Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
 # Date: 1/07/2022
@@ -49,7 +49,6 @@ fi
 ###                     Starter Code End                       ###
 ##################################################################
 
-# Check that invalid use of tigger-show give an error
 
 # Create a simple file.
 
@@ -57,23 +56,28 @@ echo "line 1" > a
 
 # add a file to the repository staging area
 
-cat > "$expected_output" <<EOF
-EOF
-
 tigger-add a > "$actual_output" 2>&1
 
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check file in index
+# check file present in index
 
 cat > "$expected_output" <<EOF
 line 1
 EOF
 
 tigger-show :a > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# try use tigger-rm
+
+cat > "$expected_output" <<EOF
+tigger-rm: error: 'a' has staged changes in the index
+EOF
+
+tigger-rm a > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
@@ -93,7 +97,7 @@ if ! diff "$expected_output" "$actual_output"; then
     exit 1
 fi
 
-# check file in commit 0
+# check commit success
 
 cat > "$expected_output" <<EOF
 line 1
@@ -106,40 +110,24 @@ if ! diff "$expected_output" "$actual_output"; then
     exit 1
 fi
 
-# check commit record in log
-
-cat > "$expected_output" <<EOF
-0 first commit
-EOF
-
-tigger-log > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# add a new file
-
-echo "hello" > b
-
-# make changes to previous fil 
+# Update the file.
 
 echo "line 2" >> a
 
-# add files to staging area
+# update the file in the repository staging area
 
 cat > "$expected_output" <<EOF
 EOF
 
-tigger-add a b > "$actual_output" 2>&1
+
+tigger-add a > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# check 'a' in staging area
+# check file present in index is correct
 
 cat > "$expected_output" <<EOF
 line 1
@@ -153,20 +141,52 @@ if ! diff "$expected_output" "$actual_output"; then
     exit 1
 fi
 
-# check 'b' in staging area
+# try use tigger-rm
 
 cat > "$expected_output" <<EOF
-hello
+tigger-rm: error: 'a' has staged changes in the index
 EOF
 
-tigger-show :b > "$actual_output" 2>&1
+tigger-rm a > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# save changes to repository
+##########
+ 
+# Update the file.
+
+echo "line 3" >> a
+
+# try use tigger-rm
+
+cat > "$expected_output" <<EOF
+tigger-rm: error: 'a' in index is different to both the working file and the repository
+EOF
+
+tigger-rm a > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# add 'file' to staging area
+
+cat > "$expected_output" <<EOF
+EOF
+
+
+tigger-add a > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# commit the file to the repository history
 
 cat > "$expected_output" <<EOF
 Committed as commit 1
@@ -179,52 +199,23 @@ if ! diff "$expected_output" "$actual_output"; then
     exit 1
 fi
 
-# check 'a' and 'b' in commit 1
+# Update the file.
 
+echo "line 4" >> a
 
-# check 'a' in staging area
+# use tigger-rm
 
 cat > "$expected_output" <<EOF
-line 1
-line 2
+tigger-rm: error: 'a' in the repository is different to the working file
 EOF
 
-tigger-show 1:a > "$actual_output" 2>&1
+tigger-rm a > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
-
-# check 'b' in staging area
-
-cat > "$expected_output" <<EOF
-hello
-EOF
-
-tigger-show 1:b > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check tigger-log print in descending order
-
-
-cat > "$expected_output" <<EOF
-1 second commit
-0 first commit
-EOF
-
-tigger-log > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
 
 # END OF TEST
 
-echo "Test00 (tigger-log tigger-show): Passed!"
+echo "Test01 (tigger-rm warnings): Passed!"

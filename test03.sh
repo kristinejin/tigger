@@ -1,11 +1,11 @@
 #! /usr/bin/env dash
 
 # ==============================================================================
-# test00.sh
-# Test tigger-log and tigger-show
+# test03.sh
+# Test the tigger-rm with options --force / --cached.
 #
 # Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
-# Date: 1/07/2022
+# Date: 3/07/2022
 # For COMP2041 Assignment 1
 # ==============================================================================
 
@@ -49,8 +49,6 @@ fi
 ###                     Starter Code End                       ###
 ##################################################################
 
-# Check that invalid use of tigger-show give an error
-
 # Create a simple file.
 
 echo "line 1" > a
@@ -67,13 +65,91 @@ if ! diff "$expected_output" "$actual_output"; then
     exit 1
 fi
 
-# check file in index
+# remove file in staging area
 
 cat > "$expected_output" <<EOF
-line 1
+EOF
+
+tigger-rm --cached a > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# make sure file in staging area been removed properly
+
+cat > "$expected_output" <<EOF
+tigger-show: error: 'a' not found in index
 EOF
 
 tigger-show :a > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# add file to staging area again 
+
+cat > "$expected_output" <<EOF
+EOF
+
+tigger-add a > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# ignore warning and remove file from working directory and staging area
+
+cat > "$expected_output" <<EOF
+EOF
+
+tigger-rm --force a > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# make sure file in staging area been removed properly
+
+cat > "$expected_output" <<EOF
+tigger-show: error: 'a' not found in index
+EOF
+
+tigger-show :a > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# make sure file in working been removed properly
+
+cat > "$expected_output" <<EOF
+find: a: No such file or directory
+EOF
+
+find a > "$actual_output" 2>&1
+
+if ! diff "$expected_output" "$actual_output"; then
+    echo "Failed test"
+    exit 1
+fi
+
+# create a new file
+
+echo "line 1" > a
+
+# add a file to the repository staging area
+
+cat > "$expected_output" <<EOF
+EOF
+
+tigger-add a > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
@@ -93,138 +169,51 @@ if ! diff "$expected_output" "$actual_output"; then
     exit 1
 fi
 
-# check file in commit 0
-
-cat > "$expected_output" <<EOF
-line 1
-EOF
-
-tigger-show 0:a > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check commit record in log
-
-cat > "$expected_output" <<EOF
-0 first commit
-EOF
-
-tigger-log > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# add a new file
-
-echo "hello" > b
-
-# make changes to previous fil 
+# edit file in working area
 
 echo "line 2" >> a
 
-# add files to staging area
+# add file to staging area
 
 cat > "$expected_output" <<EOF
 EOF
 
-tigger-add a b > "$actual_output" 2>&1
+tigger-add a > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# check 'a' in staging area
+# edit file in working area again
+
+echo "line 1" >> a
+
+# unsuccess remove file in staging area without force 
 
 cat > "$expected_output" <<EOF
-line 1
-line 2
+tigger-rm: error: 'a' in index is different to both the working file and the repository
 EOF
 
-tigger-show :a > "$actual_output" 2>&1
+tigger-rm --cached a > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
 
-# check 'b' in staging area
+# remove file in staging area with --force
 
 cat > "$expected_output" <<EOF
-hello
 EOF
 
-tigger-show :b > "$actual_output" 2>&1
+tigger-rm --force --cached a > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
     exit 1
 fi
-
-# save changes to repository
-
-cat > "$expected_output" <<EOF
-Committed as commit 1
-EOF
-
-tigger-commit -m 'second commit' > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check 'a' and 'b' in commit 1
-
-
-# check 'a' in staging area
-
-cat > "$expected_output" <<EOF
-line 1
-line 2
-EOF
-
-tigger-show 1:a > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check 'b' in staging area
-
-cat > "$expected_output" <<EOF
-hello
-EOF
-
-tigger-show 1:b > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
-# check tigger-log print in descending order
-
-
-cat > "$expected_output" <<EOF
-1 second commit
-0 first commit
-EOF
-
-tigger-log > "$actual_output" 2>&1
-
-if ! diff "$expected_output" "$actual_output"; then
-    echo "Failed test"
-    exit 1
-fi
-
 
 # END OF TEST
 
-echo "Test00 (tigger-log tigger-show): Passed!"
+echo "Test03 (tigger-rm --force --cached): Passed!"
