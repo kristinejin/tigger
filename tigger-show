@@ -1,8 +1,17 @@
 #! /bin/dash
 
-# The tigger-show should print the contents of the specified filename 
-#   as of the specified commit. 
+# ==============================================================================
+# tigger-status.sh
+# Implementation of tigger-show command.
+#
+# Print the contents of the specified filename as of the specified commit. 
 # If commit is omitted, the contents of the file in the index should be printed.
+#
+# Written by: Kristine Jin <z5362038@ad.unsw.edu.au>
+# Date: 8/07/2022
+# For COMP2041 Assignment 1
+# ==============================================================================
+
 
 if [ ! -d ".tigger" ]
 then
@@ -45,7 +54,7 @@ esac
 # $1 - commit index
 # $2 - fname
 commit() {
-    if [ ! -f "$index"/.commit$1/$2 ]
+    if [ ! -f "$index"/.commit"$1"/"$2" ]
     then
         echo "tigger-show: error: '$2' not found in commit $1" 1>&2
         exit 1
@@ -56,7 +65,7 @@ commit() {
 # 3. "tigger-show: error: invalid filename ''"
 # tigger-show: error: invalid object wowo
 index() {
-    if [ ! -f "$index"/$1 ]
+    if [ ! -f "$index"/"$1" ]
     then
         echo "tigger-show: error: '$1' not found in index" 1>&2
         exit 1

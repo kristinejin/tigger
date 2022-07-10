@@ -175,12 +175,7 @@ EOF
 
 tigger-commit "helo" > "$actual_output" 2>&1
 
-if [ "$?" -eq 0 ]; then
-    echo "Failed test"
-    exit 1
-fi
-
-if ! diff "$expected_output" "$actual_output"; then
+if ! diff "$expected_output" "$actual_output" || [ "$?" -eq 0 ]; then
     echo "Failed test"
     exit 1
 fi

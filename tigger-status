@@ -80,18 +80,17 @@ checkRepo() {
 
 # check if current directory is empty
 
-find * >/dev/null 2>/dev/null
-if [ "$?" -ne 0 ]
+if ! find -- * >/dev/null 2>/dev/null
 then
-    directories="$index ""$repo"
+    files="$(find -- "$index" "$repo" -type f)"
 else
-    directories="* ""$index ""$repo"
+    files="$(find -- * "$index" "$repo" -type f)"
 fi
 
 # glob all files in working directory, staging area and repo 
 # sort the files in alphabetical order before other process
 
-find $directories -type f | sed "s/.*\///" | sort -u |
+echo "$files" | sed "s/.*\///" | sort -u |
 while read -r f
 do
 

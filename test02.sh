@@ -52,14 +52,14 @@ fi
 
 # Create a simple file.
 
-echo "line 1" > test
+echo "line 1" > testF
 
 # add a file to the repository staging area
 
 cat > "$expected_output" <<EOF
 EOF
 
-tigger-add test > "$actual_output" 2>&1
+tigger-add testF > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
@@ -83,7 +83,7 @@ fi
 cat > "$expected_output" <<EOF
 EOF
 
-tigger-rm test > "$actual_output" 2>&1
+tigger-rm testF > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
@@ -93,10 +93,10 @@ fi
 # check if file in staging area have been removed successfully
 
 cat > "$expected_output" <<EOF
-tigger-show: error: 'test' not found in index
+tigger-show: error: 'testF' not found in index
 EOF
 
-tigger-show :test > "$actual_output" 2>&1
+tigger-show :testF > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
@@ -105,10 +105,10 @@ fi
 
 # check if file in working directory have been removed successfully
 cat > "$expected_output" <<EOF
-find: test: No such file or directory
+find: ‘testF’: No such file or directory
 EOF
 
-find test > "$actual_output" 2>&1
+find testF > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
@@ -119,14 +119,14 @@ fi
 
 # restore test file
 
-echo "restore" > test
+echo "restore" > testF
 
 # add test file to staging area
 
 cat > "$expected_output" <<EOF
 EOF
 
-tigger-add test > "$actual_output" 2>&1
+tigger-add testF > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"
@@ -148,14 +148,14 @@ fi
 
 # remove file in working directory
 
-rm test
+rm testF
 
 # remove file using tigger-rm
 
 cat > "$expected_output" <<EOF
 EOF
 
-tigger-rm test > "$actual_output" 2>&1
+tigger-rm testF > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test, 161"
@@ -165,10 +165,10 @@ fi
 # check file been removed in index
 
 cat > "$expected_output" <<EOF
-tigger-show: error: 'test' not found in index
+tigger-show: error: 'testF' not found in index
 EOF
 
-tigger-show :test > "$actual_output" 2>&1
+tigger-show :testF > "$actual_output" 2>&1
 
 if ! diff "$expected_output" "$actual_output"; then
     echo "Failed test"

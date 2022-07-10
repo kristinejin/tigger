@@ -130,7 +130,7 @@ fi
 # make sure file in working been removed properly
 
 cat > "$expected_output" <<EOF
-find: a: No such file or directory
+find: ‘a’: No such file or directory
 EOF
 
 find a > "$actual_output" 2>&1

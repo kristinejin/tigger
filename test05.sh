@@ -170,7 +170,7 @@ fi
 
 # create new file
 
-echo "line 1" > A
+echo "line 1" > a
 
 # add new file to staging area
 
@@ -212,7 +212,8 @@ fi
 
 # update file
 
-echo "line 2" >> A
+echo "line 2" >> a
+
 
 # use commit with -a option to add file to staging area and repository
 
