@@ -1,6 +1,6 @@
 # ✨ Tigger ✨
 
-*Tigger is a clone of git that is built in Posix Shell. *
+*Tigger is a clone of git that is built in Posix Shell.*
 
 Tigger works very similar as git. The command `tigger-init`, just like `git init` creates a new repository under the current directory. 
 
