@@ -4,9 +4,8 @@
 
 Tigger works very similar as git. The command `tigger-init`, just like `git init` creates a new repository under the current directory. 
 
+Current **working features** includes:
 ---
-
-Current working features includes:
 
 - `tigger-init`
 - `tigger-add`
@@ -15,9 +14,8 @@ Current working features includes:
 - `tigger-status`
 - `tigger-log`
 
+Some **future features** to look forward to: 
 ---
-
-Some future feature to look forward to: 
 - `tigger-branch`
 - `tigger-merge`
 - `tigger-checkout`
